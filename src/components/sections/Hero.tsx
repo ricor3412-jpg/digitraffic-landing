@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { CTAButton } from '@/components/ui/Button'
+import { Magnetic } from '@/components/ui/Magnetic'
 import { GlowOrb } from '@/components/svg/Visuals'
 import { TrafficFlow } from '@/components/svg/TrafficFlow'
 import { CALENDLY_DURATION, HERO } from '@/lib/config'
@@ -118,7 +119,10 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 1.15, ease: EASE }}
             className="flex flex-wrap items-center gap-4"
           >
-            <CTAButton size="lg">{HERO.cta}</CTAButton>
+            {/* Imán: el botón se acerca al cursor cuando entra en su zona */}
+            <Magnetic radius={80} pull={0.4}>
+              <CTAButton size="lg">{HERO.cta}</CTAButton>
+            </Magnetic>
 
             <motion.div
               initial={{ opacity: 0 }}
