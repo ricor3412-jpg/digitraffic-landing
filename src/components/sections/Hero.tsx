@@ -49,7 +49,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pt-32 pb-24 sm:px-8"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pt-32 pb-24 max-md:pt-24 max-md:pb-8 sm:px-8"
     >
       {/* Fondo: retícula + orbes de color */}
       <div className="bg-grid absolute inset-0 opacity-40" aria-hidden="true" />
@@ -176,7 +176,9 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.2, delay: 0.5 }}
-        className="pointer-events-none relative z-0 -mt-4 w-full max-w-[1400px]"
+        /* En móvil el lienzo es vertical y alto: hay que recortar espacio o el
+           hero desborda la pantalla y el dock tapa las notificaciones. */
+        className="pointer-events-none relative z-0 -mt-4 w-full max-w-[1400px] max-md:-mt-10 max-md:-mb-16"
       >
         <TrafficFlow />
       </motion.div>
