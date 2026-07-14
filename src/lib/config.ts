@@ -166,58 +166,51 @@ export const SOLUTIONS = {
 } as const
 
 /* ── 8. CALCULADORA CRO ───────────────────────────────────────
-   La pieza central de conversión. El visitante mete sus números
-   y ve en vivo cuánto dinero está dejando escapar.
+   ES UNA HERRAMIENTA PARA ELLOS, NO UN ARGUMENTO NUESTRO.
+
+   No promete nada ("te subimos X puntos") — eso es vendernos, y además
+   cualquier promesa fija produce disparates: prometer +0,5 pts a quien
+   convierte al 0,1 % es prometerle sextuplicar las ventas.
+
+   Lo único que hace es responder, con SUS números, a una pregunta que el
+   dueño de una tienda nunca se ha parado a calcular:
+
+        ¿cuánto vale, en pesos, cada punto de conversión?
+
+   El visitante mueve sus sliders, ve lo que vale su propia mejora, y saca su
+   conclusión. Nadie le está diciendo lo que va a pasar.
    ─────────────────────────────────────────────────────────── */
 export const CALCULATOR = {
-  title: 'Calcula cuánto dejas de ganar cada mes',
+  title: '¿Cuánto vale un punto de conversión en tu tienda?',
   subtitle:
-    'Pequeñas mejoras en las métricas clave transforman tu cuenta de resultados sin aumentar un peso de inversión publicitaria.',
-  cta: 'Quiero mejorar mi tasa de conversión',
-  /* Valores de arranque de los sliders (mercado colombiano, COP).
-     Los 4 están vinculados: pedidos = sesiones × conversión / 100.
-     Al mover uno, se recalcula el que corresponda. */
+    'Mueve tus números reales y descubre cuánto factura tu tienda por cada décima de conversión. Es tu dinero, y probablemente nunca lo has calculado.',
+  cta: 'Quiero hablar de mis números',
+
+  /* Valores de arranque (mercado colombiano, COP).
+     Los 4 están vinculados: pedidos = sesiones × conversión / 100. */
   defaults: {
     sessions: 50_000,
     orders: 750,
-    conversionRate: 1.5, // % — coherente: 50.000 × 1,5% = 750
-    averageOrderValue: 180_000, // COP
+    conversionRate: 1.5, // 50.000 × 1,5% = 750 ✓
+    averageOrderValue: 180_000,
   },
+
   /* Rangos de los sliders.
-     OJO: el de PEDIDOS no está aquí porque no es fijo — se deriva de las
-     sesiones y de los límites de conversión (ver Calculator.tsx). Si fuera
-     fijo, se podrían pedir 20.000 pedidos con 50.000 sesiones = 40% de
-     conversión, que es imposible, y el slider de conversión se quedaba
-     clavado en su tope mintiendo. */
+     El de PEDIDOS no está aquí: se deriva de las sesiones y de los límites de
+     conversión (ver Calculator.tsx). Si fuera fijo se podrían pedir
+     combinaciones imposibles —20.000 pedidos con 50.000 sesiones serían un
+     40 % de conversión— y el slider de conversión mentiría al topar. */
   ranges: {
     sessions: { min: 1_000, max: 100_000, step: 1_000 },
     conversionRate: { min: 0.1, max: 10, step: 0.1 },
     averageOrderValue: { min: 20_000, max: 600_000, step: 10_000 },
   },
-  /* Mejora de conversión que prometemos (en puntos porcentuales).
-     OJO: es el uplift MÁXIMO, no uno garantizado pase lo que pase. Si el
-     visitante ya convierte cerca del techo del sector, el margen de mejora
-     real es menor (ver `benchmarkCeiling`). Decirle a alguien que convierte
-     al 10% que "pierde 300 millones" es absurdo y le quita credibilidad a
-     toda la pieza. */
-  upliftPoints: 0.5,
 
-  /* Techo del sector: por encima de esto ya estás en la élite y no hay margen
-     que prometer. La mejora alcanzable se estrecha conforme te acercas a este
-     número, y en el tope es exactamente cero.
-
-     6 % es el percentil ~90 del e-commerce (la MEDIA real ronda el 2–3 %). Es
-     un techo alto pero defendible: casi nadie lo alcanza, así que la promesa
-     de +0,5 pts sigue viva en casi todo el rango, y a la vez no le dice a
-     quien convierte al 4 % que lo está haciendo mal. Ojo si lo subes más:
-     con el techo en 8, un 3 % (que es normal) puntuaría 37/100 y la pieza
-     pierde credibilidad ante alguien que conoce sus números. */
-  benchmarkCeiling: 6, // % de conversión
-
-  /* Umbrales del veredicto */
-  thresholds: {
-    good: 3, // a partir de aquí, "vas bien"
-    excellent: 5.5, // a partir de aquí, no hay nada que arreglar
+  /* Referencia del sector para situarle, NO para prometerle nada.
+     La media real del e-commerce ronda el 2–3 %. */
+  benchmark: {
+    average: 2.5, // media del sector
+    good: 4, // a partir de aquí lo está haciendo bien
   },
 } as const
 
