@@ -76,29 +76,6 @@ export function Navbar() {
 
   return (
     <>
-      {/* Barra superior: solo la marca. La navegación vive abajo, en el dock. */}
-      <motion.div
-        initial={{ y: -40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed inset-x-0 top-0 z-40 flex justify-between px-5 py-5 sm:px-8"
-      >
-        <a href="#hero" aria-label="Digitraffic — inicio">
-          <img
-            src="/brand/logo-horizontal-blanco.svg"
-            alt="Digitraffic"
-            className="h-7 w-auto"
-          />
-        </a>
-
-        {/* En móvil el dock no tiene sitio para el CTA, así que va aquí */}
-        <div className="sm:hidden">
-          <CTAButton size="md" className="!px-4 !py-2 !text-xs">
-            Agendar
-          </CTAButton>
-        </div>
-      </motion.div>
-
       <motion.header
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: hidden ? 120 : 0, opacity: hidden ? 0 : 1 }}
@@ -150,10 +127,16 @@ export function Navbar() {
           )
         })}
 
-          {/* CTA pegado al dock */}
-          <div className="ml-1 hidden sm:block">
-            <CTAButton size="md" className="!rounded-xl !px-4 !py-2.5 !text-xs">
-              Trabajemos juntos
+          {/* CTA pegado al dock. También en móvil: la barra del hero se va con
+              el scroll, así que sin esto el visitante se queda SIN ningún botón
+              visible en cuanto baja — en una landing de conversión, fatal. */}
+          <div className="ml-1">
+            <CTAButton
+              size="md"
+              className="!rounded-xl !px-3 !py-2.5 !text-[11px] sm:!px-4 sm:!text-xs"
+            >
+              <span className="sm:hidden">Agendar</span>
+              <span className="hidden sm:inline">Trabajemos juntos</span>
             </CTAButton>
           </div>
         </nav>

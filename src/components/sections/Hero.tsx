@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { CTAButton } from '@/components/ui/Button'
 import { Magnetic } from '@/components/ui/Magnetic'
+import { HeroBar } from '@/components/sections/HeroBar'
 import { GlowOrb } from '@/components/svg/Visuals'
 import { TrafficFlow } from '@/components/svg/TrafficFlow'
 import { CALENDLY_DURATION, HERO } from '@/lib/config'
@@ -58,6 +59,11 @@ export function Hero() {
       />
       <GlowOrb className="top-[-10%] left-[10%] h-[420px] w-[420px] bg-magenta/25" />
       <GlowOrb className="right-[5%] bottom-[10%] h-[380px] w-[380px] bg-purple/30" />
+
+      {/* Barra del hero: se queda aquí, NO sigue al scroll */}
+      <div className="absolute inset-x-0 top-0 z-30 px-5 pt-5 sm:px-8">
+        <HeroBar />
+      </div>
 
       <div className="relative z-10 mx-auto w-full max-w-4xl">
         {/* ── Texto, centrado sobre el flujo ──
