@@ -37,7 +37,9 @@ export function Counter({
     return () => controls.stop()
   }, [value, motionValue, reduce])
 
-  const formatted = display.toLocaleString('es-ES', {
+  /* es-CO, no es-ES: la landing es para Colombia y el separador de miles
+     importa — sin él, "$ 6.000 M" salía como "$ 6000 M", que se lee fatal. */
+  const formatted = display.toLocaleString('es-CO', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   })

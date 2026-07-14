@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { Section, SectionHeader } from '@/components/ui/Section'
 import { Reveal } from '@/components/ui/Motion'
@@ -155,8 +155,6 @@ function Money({ value, className }: { value: number; className?: string }) {
 }
 
 export function Calculator() {
-  const reduce = useReducedMotion()
-
   const [sessions, setSessions] = useState<number>(defaults.sessions)
   const [orders, setOrders] = useState<number>(defaults.orders)
   const [cvr, setCvr] = useState<number>(defaults.conversionRate)
@@ -188,25 +186,33 @@ export function Calculator() {
   const m = useMemo(() => {
     const revenue = orders * aov
 
-    /* LA CIFRA CLAVE: lo que factura una décima de punto de conversión.
-       No es una promesa, es una propiedad de SU tienda. */
-    const perTenth = sessions * 0.001 * aov
-    const perPoint = perTenth * 10
+    /* LA CIFRA CLAVE: lo que factura un punto de conversión.
+       No es una promesa: es una propiedad de SU tienda, y no depende de en qué
+       conversión esté ahora. */
+    const perPoint = sessions * 0.01 * aov
 
-    /* Dónde está respecto al sector (para situarle, no para venderle) */
-    const vsAverage = cvr / benchmark.average
+    /* Puntuación 0–100 sobre el techo del sector. Solo para situarle. */
+    const score = Math.max(
+      3,
+      Math.min(100, Math.round((cvr / benchmark.ceiling) * 100)),
+    )
 
     return {
       revenue,
       yearly: revenue * 12,
-      perTenth,
       perPoint,
       perPointYearly: perPoint * 12,
-      vsAverage,
+      score,
       isAbove: cvr >= benchmark.good,
       isBelow: cvr < benchmark.average,
     }
   }, [sessions, orders, cvr, aov])
+
+  const verdict = m.isAbove
+    ? { label: 'Por encima de la media', tone: 'text-gain' }
+    : m.isBelow
+      ? { label: 'Por debajo de la media', tone: 'text-amber-400' }
+      : { label: 'En la media del sector', tone: 'text-muted' }
 
   return (
     <Section id="calculadora">
@@ -222,10 +228,13 @@ export function Calculator() {
         subtitle={CALCULATOR.subtitle}
       />
 
-      <Reveal className="mt-16">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.05fr]">
-          {/* ── Entradas ── */}
-          <div className="rounded-3xl border border-line bg-surface/50 p-7 sm:p-8">
+      {/* UNA sola tarjeta partida en dos columnas: los controles a la
+          izquierda, los números a la derecha. Un solo borde, un solo bloque.
+          pb-20 porque el dock flotante vive abajo y tapaba el CTA. */}
+      <Reveal className="mt-16 pb-20">
+        <div className="grid overflow-hidden rounded-3xl border border-line bg-surface/50 lg:grid-cols-[1fr_1.05fr]">
+          {/* ── Controles ── */}
+          <div className="p-7 sm:p-8">
             <div className="mb-7 flex items-center justify-between gap-3">
               <p className="text-xs font-semibold tracking-wide text-faint uppercase">
                 Tus números
@@ -278,52 +287,65 @@ export function Calculator() {
               />
             </div>
 
-            <p className="mt-7 border-t border-line pt-5 font-mono text-[10px] leading-relaxed text-faint">
-              pedidos = sesiones × conversión —{' '}
-              <span className="text-muted">
-                mueve cualquiera y los demás se ajustan
-              </span>
-            </p>
           </div>
 
-          {/* ── Resultado ── */}
-          <div className="relative overflow-hidden rounded-3xl border border-magenta/30 bg-gradient-to-br from-surface to-void p-7 sm:p-8">
+          {/* ── Resultado ──
+              El separador es lateral en escritorio (la columna va al lado) y
+              superior en móvil (donde se apilan). */}
+          <div className="relative overflow-hidden border-t border-line bg-gradient-to-br from-magenta/[0.08] to-void p-7 sm:p-8 lg:border-t-0 lg:border-l">
             <div
-              className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-magenta/20 blur-[80px]"
+              className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-magenta/20 blur-[80px]"
               aria-hidden="true"
             />
 
             <div className="relative flex h-full flex-col gap-6">
-              {/* Facturación actual: el punto de partida, sin dramas */}
-              <div>
-                <p className="text-xs font-semibold tracking-wide text-faint uppercase">
-                  Facturas al mes
-                </p>
-                <Money
-                  value={m.revenue}
-                  className="mt-1 block text-2xl font-bold text-bone tabular-nums"
-                />
-                <p className="mt-1 text-xs text-faint">
-                  {formatCOP(m.yearly)} al año
-                </p>
+              {/* Puntuación CRO, arriba */}
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-faint uppercase">
+                    Puntuación CRO
+                  </p>
+                  <p className={`mt-1 text-sm font-semibold ${verdict.tone}`}>
+                    {verdict.label}
+                  </p>
+                </div>
+
+                <div className="relative h-20 w-20 shrink-0">
+                  <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="#2a3441"
+                      strokeWidth="7"
+                    />
+                    <motion.circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="#ff13cd"
+                      strokeWidth="7"
+                      strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * 34}
+                      animate={{
+                        strokeDashoffset: 2 * Math.PI * 34 * (1 - m.score / 100),
+                      }}
+                      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Counter
+                      value={m.score}
+                      className="text-xl font-bold text-bone tabular-nums"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* LA CIFRA: cuánto vale su punto de conversión */}
-              <motion.div
-                animate={
-                  reduce
-                    ? undefined
-                    : {
-                        borderColor: [
-                          'rgb(255 19 205 / 0.3)',
-                          'rgb(255 19 205 / 0.65)',
-                          'rgb(255 19 205 / 0.3)',
-                        ],
-                      }
-                }
-                transition={{ duration: 2.8, repeat: Infinity }}
-                className="rounded-2xl border border-magenta/30 bg-magenta/[0.07] p-6"
-              >
+              {/* La cifra */}
+              <div className="rounded-2xl border border-magenta/25 bg-magenta/[0.07] p-6">
                 <p className="text-xs font-semibold tracking-wide text-magenta-soft uppercase">
                   Cada punto de conversión te vale
                 </p>
@@ -332,56 +354,21 @@ export function Calculator() {
                   className="mt-2 block text-4xl font-bold text-magenta-soft tabular-nums sm:text-5xl"
                 />
                 <p className="mt-2 text-sm text-muted">
-                  al mes. Son{' '}
+                  al mes ·{' '}
                   <span className="font-semibold text-bone">
                     {formatCOP(m.perPointYearly)}
                   </span>{' '}
-                  al año.
-                </p>
-              </motion.div>
-
-              {/* La escala: qué compra cada décima */}
-              <div className="rounded-2xl border border-line bg-void/60 p-5">
-                <p className="text-[11px] text-faint">
-                  Incluso una sola décima —de {formatPercent(cvr, 1)} a{' '}
-                  {formatPercent(cvr + 0.1, 1)}— son{' '}
-                  <span className="font-semibold text-gain">
-                    <Money value={m.perTenth} />
-                  </span>{' '}
-                  más cada mes, con el mismo tráfico y sin gastar un peso más en
-                  publicidad.
+                  al año
                 </p>
               </div>
 
-              {/* Dónde está respecto al sector — informativo, no acusatorio */}
-              <div className="flex items-center gap-3 rounded-2xl border border-line bg-void/40 px-5 py-4">
-                <span
-                  className={`h-2 w-2 shrink-0 rounded-full ${
-                    m.isAbove
-                      ? 'bg-gain'
-                      : m.isBelow
-                        ? 'bg-amber-400'
-                        : 'bg-muted'
-                  }`}
-                />
-                <p className="text-[11px] leading-relaxed text-muted">
-                  La media del e-commerce ronda el{' '}
-                  {formatPercent(benchmark.average, 1)}.{' '}
-                  {m.isAbove ? (
-                    <span className="font-semibold text-bone">
-                      Tú estás por encima.
-                    </span>
-                  ) : m.isBelow ? (
-                    <span className="font-semibold text-bone">
-                      Tú estás por debajo.
-                    </span>
-                  ) : (
-                    <span className="font-semibold text-bone">
-                      Estás en la media.
-                    </span>
-                  )}
-                </p>
-              </div>
+              <p className="text-xs text-faint">
+                Hoy facturas{' '}
+                <span className="font-semibold text-muted">
+                  {formatCOP(m.revenue)}
+                </span>{' '}
+                al mes con el tráfico que ya tienes.
+              </p>
 
               <div className="mt-auto pt-1">
                 <CTAButton className="w-full">{CALCULATOR.cta}</CTAButton>

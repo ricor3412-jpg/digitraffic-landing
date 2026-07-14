@@ -211,6 +211,10 @@ export const CALCULATOR = {
   benchmark: {
     average: 2.5, // media del sector
     good: 4, // a partir de aquí lo está haciendo bien
+    /* Tope de la escala de puntuación. Un 6 % es el percentil ~90 del
+       e-commerce: casi nadie lo alcanza, así que puntuar sobre él no insulta
+       a quien va bien. */
+    ceiling: 6,
   },
 } as const
 
