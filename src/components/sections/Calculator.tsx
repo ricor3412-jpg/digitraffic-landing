@@ -5,7 +5,12 @@ import { Pulse, Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { Counter } from '@/components/ui/Counter'
 import { CALCULATOR } from '@/lib/config'
-import { CURRENCY, formatCOP, splitCOPShort } from '@/lib/money'
+import {
+  CURRENCY,
+  formatCOP,
+  formatPercent,
+  splitCOPShort,
+} from '@/lib/money'
 
 const { defaults, ranges, upliftPoints, benchmarkCeiling, thresholds } =
   CALCULATOR
@@ -132,6 +137,14 @@ function BigMoney({ value, className }: { value: number; className?: string }) {
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v))
 
+/* La conversión se PINTA con 1 decimal, así que se GUARDA con 1 decimal.
+   Si el estado guarda 4,58 y la pantalla dice 4,6, el usuario ve sumas que no
+   cuadran: "4,6 % + 0,4 pts = 5,0 %" solo funciona por casualidad, y con otros
+   valores no funciona. Lo que se ve es lo que se calcula. */
+const CVR_DECIMALS = 1
+const roundCvr = (v: number) =>
+  Math.round(v * 10 ** CVR_DECIMALS) / 10 ** CVR_DECIMALS
+
 /* El rango de PEDIDOS se deriva de las sesiones: sus extremos son los que
    producen la conversión mínima y máxima. Así el slider de pedidos nunca
    puede pedir una conversión imposible (ej. 3.000 pedidos con 50.000
@@ -174,19 +187,23 @@ export function Calculator() {
   }
 
   function changeOrders(next: number) {
-    setOrders(next)
-    setCvr(
-      clamp(
-        +((next / sessions) * 100).toFixed(2),
-        ranges.conversionRate.min,
-        ranges.conversionRate.max,
-      ),
+    /* Se redondea la conversión al decimal que se muestra y DESPUÉS se
+       reajustan los pedidos a esa conversión. El slider de pedidos "imanta"
+       ligeramente al valor coherente en vez de dejar un 4,58 escondido detrás
+       de un 4,6 pintado. */
+    const nextCvr = clamp(
+      roundCvr((next / sessions) * 100),
+      ranges.conversionRate.min,
+      ranges.conversionRate.max,
     )
+    setCvr(nextCvr)
+    setOrders(Math.max(1, Math.round((sessions * nextCvr) / 100)))
   }
 
   function changeCvr(next: number) {
-    setCvr(next)
-    setOrders(Math.max(1, Math.round((sessions * next) / 100)))
+    const nextCvr = roundCvr(next)
+    setCvr(nextCvr)
+    setOrders(Math.max(1, Math.round((sessions * nextCvr) / 100)))
   }
 
   const m = useMemo(() => {
@@ -198,9 +215,12 @@ export function Calculator() {
        está en la élite. La mejora alcanzable se estrecha conforme te
        acercas al techo del sector, y en el tope es exactamente cero.  */
     const headroom = Math.max(0, benchmarkCeiling - cvr) // cuánto te queda
-    const uplift = Math.min(upliftPoints, headroom)
+    /* El uplift se redondea al mismo decimal que la conversión: si en pantalla
+       pone "4,6 %" y "+0,4 pts", la columna de la derecha TIENE que poner
+       "5,0 %". Sin esto, el usuario suma con los ojos y no le cuadra. */
+    const uplift = roundCvr(Math.min(upliftPoints, headroom))
 
-    const cvrUp = cvr + uplift
+    const cvrUp = roundCvr(cvr + uplift)
     const ordersUp = Math.round((sessions * cvrUp) / 100)
     const revenueUp = ordersUp * aov
 
@@ -293,7 +313,7 @@ export function Calculator() {
                 max={ranges.conversionRate.max}
                 step={ranges.conversionRate.step}
                 onChange={changeCvr}
-                format={(v) => `${v.toFixed(2)} %`}
+                format={(v) => formatPercent(v, 2)}
               />
               <Slider
                 icon={ICONS.aov}
@@ -382,7 +402,7 @@ export function Calculator() {
                     No estás perdiendo dinero
                   </p>
                   <p className="mt-3 text-sm text-muted">
-                    Con un {cvr.toFixed(1)} % estás muy por encima de la media
+                    Con un {formatPercent(cvr)} estás muy por encima de la media
                     del sector. A este nivel el crecimiento ya no viene de la
                     conversión, sino del{' '}
                     <span className="font-semibold text-bone">ticket medio</span>{' '}
@@ -425,71 +445,98 @@ export function Calculator() {
                 </motion.div>
               )}
 
-              {/* Comparativa: aquí se ve que TODO sube en cadena */}
-              <div className="overflow-hidden rounded-2xl border border-line">
-                <div className="grid grid-cols-3 gap-px bg-line">
-                  <div className="bg-void/70 p-3">
-                    <p className="text-[10px] text-faint">&nbsp;</p>
-                  </div>
-                  <div className="bg-void/70 p-3">
-                    <p className="text-[10px] font-semibold text-muted">Hoy</p>
-                  </div>
-                  <div className="bg-gain/[0.08] p-3">
-                    <p className="text-[10px] font-semibold whitespace-nowrap text-gain">
-                      {m.uplift > 0 ? `+${m.uplift.toFixed(1)} pts` : 'Al tope'}
+              {/* En élite NO se pinta la comparativa: sería contradecirse.
+                  No puedes decir "no pierdes dinero" y a renglón seguido
+                  enseñar una columna verde con más pedidos y más facturación.
+                  Se muestra su facturación actual y punto — la palanca de
+                  venta pasa a ser el ticket medio. */}
+              {m.isElite ? (
+                <div className="overflow-hidden rounded-2xl border border-line">
+                  <div className="flex items-center justify-between gap-4 bg-void/70 px-4 py-3.5">
+                    <p className="text-[11px] text-faint">
+                      Tu facturación hoy
                     </p>
-                  </div>
-
-                  {/* Conversión */}
-                  <div className="bg-void/70 px-3 py-2.5">
-                    <p className="text-[11px] text-faint">Conversión</p>
-                  </div>
-                  <div className="bg-void/70 px-3 py-2.5">
-                    <span className="font-mono text-[13px] font-semibold text-muted tabular-nums">
-                      {cvr.toFixed(1)} %
-                    </span>
-                  </div>
-                  <div className="bg-gain/[0.08] px-3 py-2.5">
-                    <span className="font-mono text-[13px] font-bold text-gain tabular-nums">
-                      {m.cvrUp.toFixed(1)} %
-                    </span>
-                  </div>
-
-                  {/* Pedidos — el eslabón que faltaba */}
-                  <div className="bg-void/70 px-3 py-2.5">
-                    <p className="text-[11px] text-faint">Pedidos</p>
-                  </div>
-                  <div className="bg-void/70 px-3 py-2.5">
-                    <Counter
-                      value={orders}
-                      className="font-mono text-[13px] font-semibold text-muted tabular-nums"
-                    />
-                  </div>
-                  <div className="bg-gain/[0.08] px-3 py-2.5">
-                    <Counter
-                      value={m.ordersUp}
-                      className="font-mono text-[13px] font-bold text-gain tabular-nums"
-                    />
-                  </div>
-
-                  {/* Facturación */}
-                  <div className="bg-void/70 px-3 py-2.5">
-                    <p className="text-[11px] text-faint">Facturación</p>
-                  </div>
-                  <div className="bg-void/70 px-3 py-2.5">
                     <BigMoney
                       value={m.revenue}
-                      className="font-mono text-[13px] font-semibold text-muted tabular-nums"
+                      className="font-mono text-base font-bold text-bone tabular-nums"
                     />
                   </div>
-                  <div className="bg-gain/[0.08] px-3 py-2.5">
-                    <BigMoney
-                      value={m.revenueUp}
-                      className="font-mono text-[13px] font-bold text-gain tabular-nums"
-                    />
+                  <div className="flex items-center justify-between gap-4 border-t border-line bg-void/70 px-4 py-3.5">
+                    <p className="text-[11px] text-faint">
+                      Conversión vs. techo del sector
+                    </p>
+                    <span className="font-mono text-base font-bold text-gain tabular-nums">
+                      {formatPercent(cvr)} / {formatPercent(benchmarkCeiling)}
+                    </span>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* Comparativa: aquí se ve que TODO sube en cadena */
+                <div className="overflow-hidden rounded-2xl border border-line">
+                  <div className="grid grid-cols-3 gap-px bg-line">
+                    <div className="bg-void/70 p-3">
+                      <p className="text-[10px] text-faint">&nbsp;</p>
+                    </div>
+                    <div className="bg-void/70 p-3">
+                      <p className="text-[10px] font-semibold text-muted">Hoy</p>
+                    </div>
+                    <div className="bg-gain/[0.08] p-3">
+                      <p className="text-[10px] font-semibold whitespace-nowrap text-gain">
+                        +{formatPercent(m.uplift).replace(' %', '')} pts
+                      </p>
+                    </div>
+
+                    {/* Conversión */}
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <p className="text-[11px] text-faint">Conversión</p>
+                    </div>
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <span className="font-mono text-[13px] font-semibold text-muted tabular-nums">
+                        {formatPercent(cvr)}
+                      </span>
+                    </div>
+                    <div className="bg-gain/[0.08] px-3 py-2.5">
+                      <span className="font-mono text-[13px] font-bold text-gain tabular-nums">
+                        {formatPercent(m.cvrUp)}
+                      </span>
+                    </div>
+
+                    {/* Pedidos — el eslabón que faltaba */}
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <p className="text-[11px] text-faint">Pedidos</p>
+                    </div>
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <Counter
+                        value={orders}
+                        className="font-mono text-[13px] font-semibold text-muted tabular-nums"
+                      />
+                    </div>
+                    <div className="bg-gain/[0.08] px-3 py-2.5">
+                      <Counter
+                        value={m.ordersUp}
+                        className="font-mono text-[13px] font-bold text-gain tabular-nums"
+                      />
+                    </div>
+
+                    {/* Facturación */}
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <p className="text-[11px] text-faint">Facturación</p>
+                    </div>
+                    <div className="bg-void/70 px-3 py-2.5">
+                      <BigMoney
+                        value={m.revenue}
+                        className="font-mono text-[13px] font-semibold text-muted tabular-nums"
+                      />
+                    </div>
+                    <div className="bg-gain/[0.08] px-3 py-2.5">
+                      <BigMoney
+                        value={m.revenueUp}
+                        className="font-mono text-[13px] font-bold text-gain tabular-nums"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <p className="text-xs leading-relaxed text-faint">
                 {m.isElite ? (
@@ -499,7 +546,8 @@ export function Calculator() {
                   </>
                 ) : (
                   <>
-                    Subir la conversión {m.uplift.toFixed(1)} puntos son{' '}
+                    Subir la conversión{' '}
+                    {formatPercent(m.uplift).replace(' %', '')} puntos son{' '}
                     <span className="font-semibold text-bone">
                       <Counter value={m.extraOrders} decimals={0} /> pedidos más
                     </span>{' '}

@@ -7,19 +7,31 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── 1. CALENDLY ──────────────────────────────────────────────
-   ⚠️ TODO: pega aquí tu URL real de Calendly.
-   Formato: https://calendly.com/tu-usuario/nombre-del-evento
-   Se usa en TODOS los botones de la página. Cambiar aquí = cambiar en todos.
-   ─────────────────────────────────────────────────────────── */
-export const CALENDLY_URL = 'https://calendly.com/digitraffic/diagnostico-cro'
+   URL real del evento. Se usa en TODOS los botones de la página:
+   cambiarla aquí la cambia en todos.
 
-/* Personalización del popup de Calendly (colores de marca) */
+   Nota: aquí va la URL PÚBLICA del evento, nunca un token de API.
+   El popup no necesita autenticación, y cualquier clave que se
+   pusiera en el frontend sería visible para todo el mundo.
+   ─────────────────────────────────────────────────────────── */
+export const CALENDLY_URL = 'https://calendly.com/digitraffic/valoracion'
+
+/* Duración real del evento en Calendly. Se muestra junto al CTA del hero,
+   así que TIENE que coincidir con lo que está configurado allí: prometer
+   30 min y que el calendario pida una hora es la forma más tonta de perder
+   una cita ya ganada. */
+export const CALENDLY_DURATION = '1 hora'
+
+/* Personalización del popup de Calendly (colores de marca).
+   Sin el `hideGdprBanner`, el aviso de cookies de Calendly tapa el
+   calendario justo cuando el usuario va a elegir día. */
 export const CALENDLY_PAGE_SETTINGS = {
   backgroundColor: '0b0f15',
   primaryColor: 'ff13cd',
   textColor: 'f1f1f1',
   hideEventTypeDetails: false,
   hideLandingPageDetails: false,
+  hideGdprBanner: true,
 } as const
 
 /* ── 2. EMPRESA ───────────────────────────────────────────── */

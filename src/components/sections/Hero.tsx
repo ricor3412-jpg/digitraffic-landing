@@ -3,7 +3,7 @@ import { CTAButton } from '@/components/ui/Button'
 import { Counter } from '@/components/ui/Counter'
 import { Float, Pulse } from '@/components/ui/Motion'
 import { GlowOrb, SaleNotification } from '@/components/svg/Visuals'
-import { HERO } from '@/lib/config'
+import { CALENDLY_DURATION, HERO } from '@/lib/config'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -140,7 +140,7 @@ export function Hero() {
                 />
               </svg>
               <span className="font-hand text-xl leading-none text-muted">
-                gratis, 30 min
+                gratis, {CALENDLY_DURATION}
               </span>
             </motion.div>
           </motion.div>

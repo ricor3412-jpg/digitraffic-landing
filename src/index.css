@@ -111,6 +111,54 @@
   }
 }
 
+/* ── Popup de Calendly ────────────────────────────────────────
+   NOTA para el futuro: el marco blanco que rodea al widget lo pinta Calendly
+   DENTRO de su iframe. Verificado abriendo la URL del evento directamente:
+   sale el mismo marco. Al ser cross-origin, su CSS es inalcanzable — ningún
+   truco de CSS, escalado, transparencia o color-scheme puede tocarlo.
+   Personalizar ese fondo requiere un plan de pago de Calendly; el día que se
+   contrate, `background_color` lo teñirá solo y esto seguirá funcionando.
+
+   Mientras tanto lo asumimos y lo convertimos en algo deliberado: una tarjeta
+   blanca, redondeada y con sombra, sobre el velo oscuro. Parece una decisión
+   de diseño, no un error. */
+.calendly-overlay {
+  background-color: rgb(11 15 21 / 0.9) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Calendly solo usa el diseño de DOS COLUMNAS (marca a la izquierda,
+   calendario a la derecha) cuando el iframe es ancho; por debajo de ~900px
+   cae al diseño vertical y obliga a hacer scroll para llegar al calendario.
+   Por eso el popup va ancho y bajo. */
+.calendly-overlay .calendly-popup {
+  width: min(1100px, calc(100vw - 40px)) !important;
+  height: min(700px, calc(100vh - 80px)) !important;
+  max-width: none !important;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 40px 100px -20px rgb(0 0 0 / 0.85),
+    0 0 80px -30px rgb(255 19 205 / 0.35);
+}
+
+.calendly-overlay .calendly-popup-content,
+.calendly-overlay .calendly-popup-content iframe {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* El botón de cerrar cae sobre el velo oscuro, así que lo queremos blanco */
+.calendly-popup-close {
+  filter: invert(1) brightness(2.4);
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+.calendly-popup-close:hover {
+  opacity: 1;
+}
+
 @layer utilities {
   /* Tipografía manuscrita, para notas al margen */
   .font-hand {
