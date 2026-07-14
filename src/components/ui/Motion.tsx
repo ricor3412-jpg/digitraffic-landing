@@ -62,6 +62,64 @@ export function Stagger({
   )
 }
 
+/** Flota en bucle. Da vida a la página aunque no haya scroll. */
+export function Float({
+  children,
+  className,
+  amplitude = 8,
+  duration = 5,
+  delay = 0,
+}: {
+  children: ReactNode
+  className?: string
+  amplitude?: number
+  duration?: number
+  delay?: number
+}) {
+  const reduce = useReducedMotion()
+
+  return (
+    <motion.div
+      className={className}
+      animate={reduce ? undefined : { y: [0, -amplitude, 0] }}
+      transition={{
+        duration,
+        delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/** Punto que late (estado "en vivo"). */
+export function Pulse({
+  className = 'bg-magenta',
+  size = 'h-2 w-2',
+}: {
+  className?: string
+  size?: string
+}) {
+  const reduce = useReducedMotion()
+
+  return (
+    <span className={`relative flex shrink-0 ${size}`}>
+      {!reduce && (
+        <motion.span
+          animate={{ scale: [1, 2.3, 1], opacity: [0.75, 0, 0.75] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className={`absolute inline-flex h-full w-full rounded-full ${className}`}
+        />
+      )}
+      <span
+        className={`relative inline-flex h-full w-full rounded-full ${className}`}
+      />
+    </span>
+  )
+}
+
 export function StaggerItem({
   children,
   className,

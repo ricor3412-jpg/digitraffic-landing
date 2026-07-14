@@ -152,38 +152,137 @@ export function AOVBars() {
   )
 }
 
-/* ── Lista de pedidos entrando (retención) ─────────────────── */
+/* ── Panel de pedidos con pestañas (retención) ──────────────── */
 const ORDERS = [
-  { id: '#16659', name: 'Laura G.', amount: '39,60 €', tag: 'Recurrente' },
-  { id: '#16658', name: 'Javier M.', amount: '37,97 €', tag: null },
-  { id: '#16657', name: 'Clara J.', amount: '41,80 €', tag: 'Recurrente' },
-  { id: '#16656', name: 'Patricia R.', amount: '72,60 €', tag: null },
+  {
+    id: '#16659',
+    name: 'Laura González',
+    time: '18:20',
+    items: 1,
+    amount: '39,60 €',
+    tag: 'Compra recurrente',
+    paid: true,
+  },
+  {
+    id: '#16658',
+    name: 'Javier Martín',
+    time: '17:58',
+    items: 3,
+    amount: '37,97 €',
+    tag: null,
+    paid: true,
+  },
+  {
+    id: '#16657',
+    name: 'Clara Jiménez',
+    time: '17:25',
+    items: 1,
+    amount: '41,80 €',
+    tag: 'Compra recurrente',
+    paid: true,
+  },
+  {
+    id: '#16656',
+    name: 'Patricia Romero',
+    time: '17:16',
+    items: 2,
+    amount: '72,60 €',
+    tag: null,
+    paid: false,
+  },
+  {
+    id: '#16655',
+    name: 'Roberto Sánchez',
+    time: '16:52',
+    items: 1,
+    amount: '43,99 €',
+    tag: 'Compra recurrente',
+    paid: true,
+  },
 ]
 
+const TABS = ['Todos', 'Sin enviar', 'Pagados', 'Abiertos'] as const
+
 export function OrdersList() {
+  const reduce = useReducedMotion()
+
   return (
-    <div className="w-full space-y-2">
-      {ORDERS.map((o, i) => (
-        <motion.div
-          key={o.id}
-          initial={{ opacity: 0, x: -16 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55, delay: i * 0.12, ease: EASE }}
-          className="flex items-center gap-3 rounded-xl border border-line bg-surface/70 px-3.5 py-2.5"
-        >
-          <span className="font-mono text-xs text-faint">{o.id}</span>
-          <span className="min-w-0 flex-1 truncate text-xs text-bone">
-            {o.name}
+    <div className="w-full overflow-hidden rounded-2xl border border-line bg-void/70">
+      {/* Cabecera con pestañas, como el admin de Shopify */}
+      <div className="flex items-center gap-1 border-b border-line bg-surface-2/40 px-3 py-2">
+        {TABS.map((tab, i) => (
+          <span
+            key={tab}
+            className={`rounded-md px-2 py-1 text-[10px] font-medium whitespace-nowrap ${
+              i === 0
+                ? 'bg-magenta/15 text-magenta-soft'
+                : 'text-faint'
+            }`}
+          >
+            {tab}
           </span>
-          {o.tag && (
-            <span className="hidden rounded-full bg-magenta/15 px-2 py-0.5 text-[10px] font-semibold text-magenta-soft sm:inline">
-              {o.tag}
+        ))}
+        <span className="ml-auto hidden font-mono text-[10px] text-faint sm:inline">
+          Hoy
+        </span>
+      </div>
+
+      {/* Filas */}
+      <div className="divide-y divide-line/50">
+        {ORDERS.map((o, i) => (
+          <motion.div
+            key={o.id}
+            initial={{ opacity: 0, x: -14 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.1, ease: EASE }}
+            className="flex items-center gap-2.5 px-3 py-2.5"
+          >
+            <span className="font-mono text-[10px] text-faint">{o.id}</span>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[11px] font-medium text-bone">
+                {o.name}
+              </p>
+              <p className="truncate text-[9px] text-faint">
+                {o.items} art. · {o.time}
+              </p>
+            </div>
+
+            {o.tag && (
+              <motion.span
+                animate={
+                  reduce ? undefined : { opacity: [0.75, 1, 0.75] }
+                }
+                transition={{ duration: 2.6, repeat: Infinity, delay: i * 0.3 }}
+                className="hidden rounded-full bg-magenta/15 px-2 py-0.5 text-[9px] font-semibold whitespace-nowrap text-magenta-soft lg:inline"
+              >
+                {o.tag}
+              </motion.span>
+            )}
+
+            <span
+              className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${
+                o.paid
+                  ? 'bg-gain/15 text-gain'
+                  : 'bg-amber-400/15 text-amber-400'
+              }`}
+            >
+              {o.paid ? 'Pagado' : 'Pendiente'}
             </span>
-          )}
-          <span className="text-xs font-semibold text-bone">{o.amount}</span>
-        </motion.div>
-      ))}
+
+            <span className="w-14 shrink-0 text-right font-mono text-[11px] font-bold text-bone">
+              {o.amount}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Pie: el dato que importa */}
+      <div className="flex items-center justify-between border-t border-line bg-surface-2/30 px-3 py-2">
+        <span className="text-[10px] text-faint">Clientes que repiten</span>
+        <span className="font-mono text-[11px] font-bold text-gain">60 %</span>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { CTAButton } from '@/components/ui/Button'
+import { Counter } from '@/components/ui/Counter'
+import { Float, Pulse } from '@/components/ui/Motion'
 import { GlowOrb, SaleNotification } from '@/components/svg/Visuals'
 import { COMPANY, HERO } from '@/lib/config'
 
@@ -67,16 +69,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
             className="inline-flex items-center gap-2.5 rounded-full border border-magenta/30 bg-magenta/10 px-4 py-2 backdrop-blur"
           >
-            <span className="relative flex h-2 w-2">
-              {!reduce && (
-                <motion.span
-                  animate={{ scale: [1, 2.2, 1], opacity: [0.8, 0, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inline-flex h-full w-full rounded-full bg-magenta"
-                />
-              )}
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-magenta" />
-            </span>
+            <Pulse />
             <span className="text-xs font-semibold text-magenta-soft">
               {COMPANY.scarcity}
             </span>
@@ -121,13 +114,48 @@ export function Hero() {
             {HERO.subtitle}
           </motion.p>
 
-          {/* CTA */}
+          {/* CTA + nota manuscrita */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.15, ease: EASE }}
+            className="flex flex-wrap items-center gap-4"
           >
             <CTAButton size="lg">{HERO.cta}</CTAButton>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6, duration: 0.6 }}
+              className="flex items-center gap-1.5"
+            >
+              {/* Flecha dibujada a mano apuntando al botón */}
+              <svg viewBox="0 0 40 24" className="h-6 w-10" aria-hidden="true">
+                <motion.path
+                  d="M37 6 C 28 3, 14 6, 6 15"
+                  fill="none"
+                  stroke="#94a3b8"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  initial={{ pathLength: reduce ? 1 : 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.7, delay: 1.7 }}
+                />
+                <motion.path
+                  d="M6 15 l7 -1 M6 15 l2 -6"
+                  fill="none"
+                  stroke="#94a3b8"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2.3 }}
+                />
+              </svg>
+              <span className="font-hand text-xl leading-none text-muted">
+                gratis, 30 min
+              </span>
+            </motion.div>
           </motion.div>
         </div>
 
@@ -138,11 +166,12 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.7, ease: EASE }}
           className="relative flex justify-center lg:justify-end"
         >
-          <div className="relative w-full max-w-md">
+          <Float className="relative w-full max-w-md" amplitude={10} duration={6}>
             {/* Panel principal: métricas en vivo */}
             <div className="relative rounded-3xl border border-line bg-surface/60 p-6 backdrop-blur-xl">
               <div className="mb-5 flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-wide text-faint uppercase">
+                <span className="flex items-center gap-2 text-xs font-semibold tracking-wide text-faint uppercase">
+                  <Pulse className="bg-gain" size="h-1.5 w-1.5" />
                   Tu tienda, optimizada
                 </span>
                 <span className="flex gap-1.5" aria-hidden="true">
@@ -153,11 +182,12 @@ export function Hero() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                {/* ⚠️ TODO: métricas de ejemplo — sustituir por resultados reales */}
                 {[
-                  { label: 'Conversión', value: '+68%' },
-                  { label: 'Ticket medio', value: '+31%' },
-                  { label: 'Velocidad', value: '0,9s' },
-                  { label: 'Recurrencia', value: '+44%' },
+                  { label: 'Conversión', v: 68, pre: '+', suf: '%', dec: 0 },
+                  { label: 'Ticket medio', v: 31, pre: '+', suf: '%', dec: 0 },
+                  { label: 'Velocidad', v: 0.9, pre: '', suf: 's', dec: 1 },
+                  { label: 'Recurrencia', v: 44, pre: '+', suf: '%', dec: 0 },
                 ].map((stat, i) => (
                   <motion.div
                     key={stat.label}
@@ -167,22 +197,25 @@ export function Hero() {
                     className="rounded-2xl border border-line/60 bg-void/50 p-4"
                   >
                     <p className="text-xs text-faint">{stat.label}</p>
-                    <p className="mt-1 text-2xl font-bold text-bone">
-                      {stat.value}
+                    <p className="mt-1 text-2xl font-bold text-bone tabular-nums">
+                      <Counter
+                        value={stat.v}
+                        decimals={stat.dec}
+                        prefix={stat.pre}
+                        suffix={stat.suf}
+                      />
                     </p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* ⚠️ TODO: estas métricas son de ejemplo. Sustitúyelas por
-                  resultados reales de tus clientes cuando los tengas. */}
             </div>
 
             {/* Notificación flotante superpuesta */}
             <div className="absolute -bottom-8 -left-4 sm:-left-10">
               <SaleNotification />
             </div>
-          </div>
+          </Float>
         </motion.div>
       </div>
     </section>

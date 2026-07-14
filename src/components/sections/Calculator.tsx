@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { Section, SectionHeader } from '@/components/ui/Section'
-import { Reveal } from '@/components/ui/Motion'
+import { Pulse, Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { Counter } from '@/components/ui/Counter'
 import { CALCULATOR } from '@/lib/config'
@@ -68,6 +68,8 @@ function Slider({
 }
 
 export function Calculator() {
+  const reduce = useReducedMotion()
+
   /* El tipo explícito es necesario: config.ts usa `as const`, así que
      defaults.sessions se infiere como el literal 50000 y no como number. */
   const [sessions, setSessions] = useState<number>(defaults.sessions)
@@ -128,9 +130,14 @@ export function Calculator() {
         <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
           {/* ── Panel de entradas ── */}
           <div className="rounded-3xl border border-line bg-surface/50 p-7 sm:p-8">
-            <p className="mb-8 text-xs font-semibold tracking-wide text-faint uppercase">
-              Tus números actuales
-            </p>
+            <div className="mb-8 flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold tracking-wide text-faint uppercase">
+                Tus números actuales
+              </p>
+              <span className="font-hand text-lg leading-none whitespace-nowrap text-magenta-soft">
+                ¡muévelos! 👆
+              </span>
+            </div>
 
             <div className="flex flex-col gap-8">
               <Slider
@@ -239,8 +246,23 @@ export function Calculator() {
               </div>
 
               {/* El número que duele */}
-              <div className="rounded-2xl border border-danger/25 bg-danger/[0.07] p-6">
-                <p className="text-xs font-semibold tracking-wide text-danger uppercase">
+              <motion.div
+                animate={
+                  reduce
+                    ? undefined
+                    : {
+                        borderColor: [
+                          'rgb(255 77 109 / 0.25)',
+                          'rgb(255 77 109 / 0.6)',
+                          'rgb(255 77 109 / 0.25)',
+                        ],
+                      }
+                }
+                transition={{ duration: 2.6, repeat: Infinity }}
+                className="rounded-2xl border border-danger/25 bg-danger/[0.07] p-6"
+              >
+                <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-danger uppercase">
+                  <Pulse className="bg-danger" size="h-1.5 w-1.5" />
                   Dejas de ganar cada mes
                 </p>
                 <Counter
@@ -255,7 +277,7 @@ export function Calculator() {
                   </span>{' '}
                   al año que se te escapan.
                 </p>
-              </div>
+              </motion.div>
 
               {/* Comparativa */}
               <div className="grid grid-cols-2 gap-3">

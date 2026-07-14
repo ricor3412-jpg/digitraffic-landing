@@ -2,6 +2,7 @@ import { motion, useMotionValue, useReducedMotion } from 'framer-motion'
 import { Section, SectionHeader } from '@/components/ui/Section'
 import { Stagger, StaggerItem, Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
+import { PROBLEM_MOCKUPS } from '@/components/svg/Mockups'
 import { PROBLEMS } from '@/lib/config'
 
 /* Icono por problema. Cada uno es un SVG original y simple. */
@@ -94,23 +95,27 @@ function ProblemCard({
         )}
 
         <div className="relative flex h-full flex-col gap-4">
-          {/* Icono */}
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-danger/25 bg-danger/10">
+          {/* Escena: muestra el problema en vez de describirlo */}
+          <div className="min-h-[124px] rounded-2xl border border-line/60 bg-void/50 p-3">
+            {PROBLEM_MOCKUPS[id]}
+          </div>
+
+          <div className="flex items-center gap-2.5">
             <svg
               viewBox="0 0 24 24"
-              className="h-5 w-5 text-danger"
+              className="h-4 w-4 shrink-0 text-danger"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.6"
+              strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
             >
               {ICONS[id]}
             </svg>
+            <h3 className="text-base font-bold text-bone">{title}</h3>
           </div>
 
-          <h3 className="text-lg font-bold text-bone">{title}</h3>
           <p className="text-sm leading-relaxed text-muted">{body}</p>
 
           {/* Número de fondo */}
@@ -140,7 +145,8 @@ export function Problems() {
         subtitle={PROBLEMS.subtitle}
       />
 
-      <Stagger className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* 2 columnas (no 3): los mockups necesitan sitio para respirar */}
+      <Stagger className="mt-16 grid gap-5 md:grid-cols-2">
         {PROBLEMS.items.map((p, i) => (
           <ProblemCard key={p.id} {...p} index={i} />
         ))}
