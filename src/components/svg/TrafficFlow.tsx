@@ -133,30 +133,42 @@ export function TrafficFlow() {
           />
         )}
 
-        <motion.circle
-          cx={CX}
-          cy={CY}
-          r={R}
-          fill="#0b0f15"
-          stroke="#2a3441"
-          strokeWidth="1"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.15, type: 'spring', bounce: 0.4 }}
-          style={{ transformOrigin: `${CX}px ${CY}px` }}
-        />
+        {/* OJO: el disco NO se dibuja aquí. Va en la capa HTML, junto al logo,
+            porque el SVG entero queda por debajo de los viajeros y las
+            notificaciones le pasarían por encima. */}
       </svg>
 
       {/* ── Capa HTML: viajeros y logo, posicionados sobre el SVG ──
           Se colocan en % del contenedor y se mueven con offsetPath usando
-          las MISMAS curvas del SVG, escaladas al tamaño real. */}
+          las MISMAS curvas del SVG, escaladas al tamaño real.
+
+          ORDEN DE CAPAS: los viajeros van DEBAJO (z-10) y el logo ENCIMA de
+          todo (z-30). Así las notificaciones pueden nacer pegadas al disco y
+          simplemente pasan por detrás del logo, sin taparlo. Es más simple y
+          más robusto que retrasar su aparición. */}
       <div className="pointer-events-none absolute inset-0">
-        {/* El logo de Shopify, en el centro exacto */}
+        {/* Viajeros: por debajo del logo */}
+        <div className="absolute inset-0 z-10">
+          {!reduce &&
+            LANES.map((lane, i) => (
+              <Traveler
+                key={i}
+                lane={lane}
+                face={FACES[i % FACES.length]}
+                delay={i * (TRIP / LANES.length)}
+              />
+            ))}
+        </div>
+
+        {/* El disco + el logo: por encima de todo (z-30).
+            El disco es OPACO y vive aquí, no en el SVG: es lo que oculta a las
+            notificaciones que pasan por debajo. Si estuviera en el SVG (que va
+            al fondo), le pasarían por encima. */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4, type: 'spring', bounce: 0.45 }}
-          className="absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+          transition={{ duration: 0.8, delay: 0.15, type: 'spring', bounce: 0.4 }}
+          className="absolute top-1/2 left-1/2 z-30 flex h-[clamp(96px,12.4vw,148px)] w-[clamp(96px,12.4vw,148px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-[#0b0f15]"
         >
           <motion.img
             src="/logos/shopify.avif"
@@ -166,17 +178,6 @@ export function TrafficFlow() {
             className="h-[clamp(40px,5.5vw,68px)] w-auto drop-shadow-[0_0_26px_rgba(149,191,71,0.5)]"
           />
         </motion.div>
-
-        {/* Un viajero por carril */}
-        {!reduce &&
-          LANES.map((lane, i) => (
-            <Traveler
-              key={i}
-              lane={lane}
-              face={FACES[i % FACES.length]}
-              delay={i * (TRIP / LANES.length)}
-            />
-          ))}
       </div>
     </div>
   )
@@ -238,16 +239,16 @@ function Traveler({
       </motion.div>
 
       {/* Fase 2 — sale convertido en pedido, medio ciclo después.
-          La línea nace pegada al disco (si no, se despega y se ve el hueco),
-          pero la NOTIFICACIÓN no se hace visible hasta haber recorrido un
-          trecho: es ancha y, si apareciera en el borde, taparía el logo. */}
+          No hace falta esconderla al principio: el logo va en una capa por
+          encima (z-20), así que la notificación puede nacer pegada al disco
+          y simplemente pasa por debajo. */}
       <motion.div
         style={{ ...common, offsetPath: `path("${lane.out}")` }}
         initial={{ offsetDistance: '0%', opacity: 0, scale: 0.5 }}
         animate={{
           offsetDistance: ['0%', '100%'],
-          opacity: [0, 0, 1, 1, 0],
-          scale: [0.5, 0.6, 1, 1, 0.85],
+          opacity: [0, 1, 1, 1, 0],
+          scale: [0.5, 1.1, 1, 1, 0.85],
         }}
         transition={{
           duration: HALF,
@@ -255,9 +256,7 @@ function Traveler({
           repeatDelay: HALF,
           delay: delay + HALF, // arranca justo cuando la persona llega al logo
           ease: 'easeOut',
-          /* invisible hasta el 22% del recorrido: para entonces ya está
-             despegada del logo */
-          times: [0, 0.22, 0.4, 0.85, 1],
+          times: [0, 0.14, 0.4, 0.85, 1],
         }}
       >
         {/* Notificación al estilo de las de Shopify: icono de la app a la
