@@ -1,32 +1,89 @@
-import { AnimatePresence, motion, useScroll, useMotionValueEvent } from 'framer-motion'
-import { useState } from 'react'
+import { motion, useMotionValueEvent, useScroll } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { CTAButton } from '@/components/ui/Button'
 import { NAV_LINKS } from '@/lib/config'
 
+/* Iconos del dock, uno por sección. */
+const ICONS: Record<string, React.ReactNode> = {
+  '#hero': (
+    <>
+      <path d="M3 10.5L12 3l9 7.5" />
+      <path d="M5 9.5V20h14V9.5" />
+    </>
+  ),
+  '#problemas': (
+    <>
+      <path d="M12 9v4M12 17h.01" />
+      <path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    </>
+  ),
+  '#soluciones': (
+    <>
+      <path d="M9 18h6M10 22h4" />
+      <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" />
+    </>
+  ),
+  '#calculadora': (
+    <>
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v3" />
+    </>
+  ),
+  '#metodologia': (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h10" />
+    </>
+  ),
+  '#faq': (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.2M12 17h.01" />
+    </>
+  ),
+}
+
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [active, setActive] = useState<string>('#hero')
+  const [hidden, setHidden] = useState(false)
   const { scrollY } = useScroll()
 
-  useMotionValueEvent(scrollY, 'change', (y) => setScrolled(y > 24))
+  /* El dock se esconde al llegar al final, para no tapar el CTA de cierre. */
+  useMotionValueEvent(scrollY, 'change', (y) => {
+    const nearBottom =
+      y + window.innerHeight > document.body.scrollHeight - 220
+    setHidden(nearBottom)
+  })
+
+  /* Scroll spy: ilumina la sección que estás mirando. */
+  useEffect(() => {
+    const sections = NAV_LINKS.map((l) =>
+      document.querySelector(l.href),
+    ).filter(Boolean) as Element[]
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (visible?.target.id) setActive(`#${visible.target.id}`)
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5] },
+    )
+
+    sections.forEach((s) => observer.observe(s))
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed inset-x-0 top-0 z-50 px-4 pt-4"
-    >
-      <nav
-        className={`mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full border px-5 py-3 transition-all duration-500 ${
-          scrolled
-            ? 'border-line bg-void/80 shadow-2xl backdrop-blur-xl'
-            : 'border-transparent bg-transparent'
-        }`}
+    <>
+      {/* Barra superior: solo la marca. La navegación vive abajo, en el dock. */}
+      <motion.div
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed inset-x-0 top-0 z-40 flex justify-between px-5 py-5 sm:px-8"
       >
-        {/* Versión blanca del logo: la horizontal por defecto lleva el texto en
-            #161F2A y sobre fondo oscuro es ilegible. */}
-        <a href="#hero" className="shrink-0" aria-label="Digitraffic — inicio">
+        <a href="#hero" aria-label="Digitraffic — inicio">
           <img
             src="/brand/logo-horizontal-blanco.svg"
             alt="Digitraffic"
@@ -34,82 +91,73 @@ export function Navbar() {
           />
         </a>
 
-        {/* Enlaces (escritorio) */}
-        <ul className="hidden items-center gap-1 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className="rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-white/5 hover:text-bone"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block">
-            <CTAButton size="md">Trabajemos juntos</CTAButton>
-          </div>
-
-          {/* Botón hamburguesa (móvil) */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={menuOpen}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-bone lg:hidden"
-          >
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
-              <motion.path
-                d={menuOpen ? 'M5 5l10 10' : 'M3 6h14'}
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-              <motion.path
-                d={menuOpen ? 'M15 5L5 15' : 'M3 12h14'}
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
+        {/* En móvil el dock no tiene sitio para el CTA, así que va aquí */}
+        <div className="sm:hidden">
+          <CTAButton size="md" className="!px-4 !py-2 !text-xs">
+            Agendar
+          </CTAButton>
         </div>
-      </nav>
+      </motion.div>
 
-      {/* Menú desplegable (móvil) */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25 }}
-            className="mx-auto mt-2 max-w-6xl overflow-hidden rounded-3xl border border-line bg-void/95 p-3 backdrop-blur-xl lg:hidden"
-          >
-            <ul className="flex flex-col">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="block rounded-2xl px-4 py-3 text-sm font-medium text-muted transition-colors hover:bg-white/5 hover:text-bone"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <div className="p-2 pt-3 sm:hidden">
-              <CTAButton size="md" className="w-full">
-                Trabajemos juntos
-              </CTAButton>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+      <motion.header
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: hidden ? 120 : 0, opacity: hidden ? 0 : 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-4 sm:pb-6"
+      >
+      <nav
+        aria-label="Navegación principal"
+        className="flex items-center gap-1 rounded-2xl border border-line bg-void/85 p-1.5 shadow-2xl backdrop-blur-xl"
+      >
+        {NAV_LINKS.map((link) => {
+          const isActive = active === link.href
+
+          return (
+            <a
+              key={link.href}
+              href={link.href}
+              aria-current={isActive ? 'page' : undefined}
+              className={`relative flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors duration-300 sm:px-4 ${
+                isActive ? 'text-bone' : 'text-faint hover:text-muted'
+              }`}
+            >
+              {/* Píldora que se desliza a la sección activa */}
+              {isActive && (
+                <motion.span
+                  layoutId="dock-activo"
+                  className="absolute inset-0 rounded-xl bg-white/[0.07]"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                />
+              )}
+
+              <svg
+                viewBox="0 0 24 24"
+                className="relative h-[18px] w-[18px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                {ICONS[link.href]}
+              </svg>
+
+              <span className="relative hidden text-[10px] font-medium sm:block">
+                {link.label}
+              </span>
+            </a>
+          )
+        })}
+
+          {/* CTA pegado al dock */}
+          <div className="ml-1 hidden sm:block">
+            <CTAButton size="md" className="!rounded-xl !px-4 !py-2.5 !text-xs">
+              Trabajemos juntos
+            </CTAButton>
+          </div>
+        </nav>
+      </motion.header>
+    </>
   )
 }

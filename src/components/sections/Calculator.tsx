@@ -9,8 +9,39 @@ import { CURRENCY, formatCOP, splitCOPShort } from '@/lib/money'
 
 const { defaults, ranges, upliftPoints } = CALCULATOR
 
+/* Iconos de cada métrica */
+const ICONS: Record<string, React.ReactNode> = {
+  sessions: (
+    <>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  orders: (
+    <>
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
+    </>
+  ),
+  cvr: (
+    <>
+      <path d="M19 5L5 19" />
+      <circle cx="6.5" cy="6.5" r="2.5" />
+      <circle cx="17.5" cy="17.5" r="2.5" />
+    </>
+  ),
+  aov: (
+    <>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+    </>
+  ),
+}
+
 /* ── Slider con etiqueta y valor en vivo ─────────────────────── */
 function Slider({
+  icon,
   label,
   value,
   min,
@@ -19,6 +50,7 @@ function Slider({
   onChange,
   format,
 }: {
+  icon?: React.ReactNode
   label: string
   value: number
   min: number
@@ -31,11 +63,27 @@ function Slider({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <label
           htmlFor={`slider-${label}`}
-          className="text-sm font-medium text-muted"
+          className="flex items-center gap-2.5 text-sm font-medium text-muted"
         >
+          {icon && (
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-void/60">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 text-magenta-soft"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                {icon}
+              </svg>
+            </span>
+          )}
           {label}
         </label>
         <span className="font-mono text-base font-bold text-bone tabular-nums">
@@ -80,20 +128,65 @@ function BigMoney({ value, className }: { value: number; className?: string }) {
   )
 }
 
+/* Mantiene los 3 datos ligados coherentes: pedidos = sesiones × conversión.
+   Al mover cualquiera de ellos, se recalcula el que toca. */
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v))
+
 export function Calculator() {
   const reduce = useReducedMotion()
 
   /* El tipo explícito es necesario: config.ts usa `as const`, así que
      defaults.sessions se infiere como el literal 50000 y no como number. */
   const [sessions, setSessions] = useState<number>(defaults.sessions)
+  const [orders, setOrders] = useState<number>(defaults.orders)
   const [cvr, setCvr] = useState<number>(defaults.conversionRate)
   const [aov, setAov] = useState<number>(defaults.averageOrderValue)
 
-  /* El modelo es RELACIONAL: los pedidos no son un dato suelto, salen de
-     sesiones × conversión. Por eso, al subir la conversión suben también los
-     pedidos, y con ellos la facturación. Eso es justo lo que vendemos. */
+  /* ── Recálculo cruzado ──────────────────────────────────────────
+     Los 4 sliders se mueven, pero pedidos = sesiones × conversión / 100
+     tiene que cumplirse SIEMPRE. Así que al tocar uno, se ajusta otro:
+       · sesiones  → recalcula pedidos (la conversión se mantiene)
+       · pedidos   → recalcula conversión (las sesiones se mantienen)
+       · conversión→ recalcula pedidos (las sesiones se mantienen)
+       · ticket    → independiente, no afecta a la relación
+     ───────────────────────────────────────────────────────────── */
+
+  function changeSessions(next: number) {
+    setSessions(next)
+    const nextOrders = clamp(
+      Math.round((next * cvr) / 100),
+      ranges.orders.min,
+      ranges.orders.max,
+    )
+    setOrders(nextOrders)
+    /* Si los pedidos toparon con el límite, la conversión se ajusta para no mentir */
+    setCvr(clamp(+((nextOrders / next) * 100).toFixed(2), ranges.conversionRate.min, ranges.conversionRate.max))
+  }
+
+  function changeOrders(next: number) {
+    setOrders(next)
+    setCvr(
+      clamp(
+        +((next / sessions) * 100).toFixed(2),
+        ranges.conversionRate.min,
+        ranges.conversionRate.max,
+      ),
+    )
+  }
+
+  function changeCvr(next: number) {
+    setCvr(next)
+    setOrders(
+      clamp(
+        Math.round((sessions * next) / 100),
+        ranges.orders.min,
+        ranges.orders.max,
+      ),
+    )
+  }
+
   const m = useMemo(() => {
-    const orders = (sessions * cvr) / 100
     const revenue = orders * aov
 
     const cvrUp = cvr + upliftPoints
@@ -107,7 +200,6 @@ export function Calculator() {
     const score = Math.max(4, Math.min(100, Math.round((cvr / 3) * 100)))
 
     return {
-      orders,
       revenue,
       cvrUp,
       ordersUp,
@@ -117,7 +209,7 @@ export function Calculator() {
       yearlyLoss: monthlyLoss * 12,
       score,
     }
-  }, [sessions, cvr, aov])
+  }, [sessions, orders, cvr, aov])
 
   const verdict =
     m.score >= 75
@@ -152,26 +244,39 @@ export function Calculator() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-7">
               <Slider
+                icon={ICONS.sessions}
                 label="Sesiones / mes"
                 value={sessions}
                 min={ranges.sessions.min}
                 max={ranges.sessions.max}
                 step={ranges.sessions.step}
-                onChange={setSessions}
+                onChange={changeSessions}
                 format={(v) => v.toLocaleString('es-CO')}
               />
               <Slider
+                icon={ICONS.orders}
+                label="Pedidos / mes"
+                value={orders}
+                min={ranges.orders.min}
+                max={ranges.orders.max}
+                step={ranges.orders.step}
+                onChange={changeOrders}
+                format={(v) => v.toLocaleString('es-CO')}
+              />
+              <Slider
+                icon={ICONS.cvr}
                 label="Tasa de conversión"
                 value={cvr}
                 min={ranges.conversionRate.min}
                 max={ranges.conversionRate.max}
                 step={ranges.conversionRate.step}
-                onChange={setCvr}
-                format={(v) => `${v.toFixed(1)} %`}
+                onChange={changeCvr}
+                format={(v) => `${v.toFixed(2)} %`}
               />
               <Slider
+                icon={ICONS.aov}
                 label="Ticket promedio"
                 value={aov}
                 min={ranges.averageOrderValue.min}
@@ -182,28 +287,13 @@ export function Calculator() {
               />
             </div>
 
-            {/* Resultado derivado: se ve que los pedidos SALEN de los sliders */}
-            <div className="mt-8 border-t border-line pt-6">
-              <p className="mb-4 font-mono text-[10px] tracking-wide text-faint uppercase">
-                sesiones × conversión = pedidos
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-faint">Pedidos / mes</p>
-                  <Counter
-                    value={m.orders}
-                    className="mt-1 block text-xl font-bold text-bone tabular-nums"
-                  />
-                </div>
-                <div>
-                  <p className="text-xs text-faint">Facturación actual</p>
-                  <BigMoney
-                    value={m.revenue}
-                    className="mt-1 block text-xl font-bold text-bone tabular-nums"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Los 3 primeros están ligados: se avisa para que no parezca un bug */}
+            <p className="mt-7 border-t border-line pt-5 font-mono text-[10px] leading-relaxed text-faint">
+              pedidos = sesiones × conversión —{' '}
+              <span className="text-muted">
+                mueve cualquiera y los demás se ajustan solos
+              </span>
+            </p>
           </div>
 
           {/* ── Panel de resultados ── */}
@@ -328,7 +418,7 @@ export function Calculator() {
                   </div>
                   <div className="bg-void/70 px-3 py-2.5">
                     <Counter
-                      value={m.orders}
+                      value={orders}
                       className="font-mono text-[13px] font-semibold text-muted tabular-nums"
                     />
                   </div>

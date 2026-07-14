@@ -31,7 +31,8 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-line px-5 py-12 sm:px-8">
+    /* pb generoso: el dock flotante vive abajo y no debe tapar el footer */
+    <footer className="border-t border-line px-5 pt-12 pb-28 sm:px-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:flex-row md:justify-between">
         <a href="#hero">
           <img

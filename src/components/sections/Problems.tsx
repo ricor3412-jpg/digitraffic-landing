@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useReducedMotion } from 'framer-motion'
+import { motion, useInView, useMotionValue, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Section, SectionHeader } from '@/components/ui/Section'
 import { Reveal } from '@/components/ui/Motion'
@@ -58,15 +58,26 @@ function ProblemCard({
   title,
   body,
   index,
+  scrollerRef,
 }: {
   id: string
   title: string
   body: string
   index: number
+  scrollerRef: React.RefObject<HTMLUListElement | null>
 }) {
   const reduce = useReducedMotion()
+  const cardRef = useRef<HTMLLIElement>(null)
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
+
+  /* La tarjeta sube desde abajo cuando entra en el CARRUSEL (no en el viewport).
+     Por eso el root del observer es el propio scroller horizontal. */
+  const inView = useInView(cardRef, {
+    root: scrollerRef,
+    once: true,
+    margin: '0px -40px 0px -40px',
+  })
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (reduce) return
@@ -76,7 +87,17 @@ function ProblemCard({
   }
 
   return (
-    <li className="w-[300px] shrink-0 snap-start sm:w-[340px]">
+    <motion.li
+      ref={cardRef}
+      initial={{ opacity: 0, y: reduce ? 0 : 60 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{
+        duration: 0.7,
+        delay: Math.min(index, 3) * 0.08,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className="w-[300px] shrink-0 snap-start sm:w-[340px]"
+    >
       <div
         onMouseMove={handleMouseMove}
         className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40"
@@ -128,7 +149,7 @@ function ProblemCard({
           </span>
         </div>
       </div>
-    </li>
+    </motion.li>
   )
 }
 
@@ -213,7 +234,12 @@ export function Problems() {
           className="flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {PROBLEMS.items.map((p, i) => (
-            <ProblemCard key={p.id} {...p} index={i} />
+            <ProblemCard
+              key={p.id}
+              {...p}
+              index={i}
+              scrollerRef={scrollerRef}
+            />
           ))}
         </ul>
 

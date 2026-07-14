@@ -45,12 +45,14 @@ export const NAV_LINKS = [
 /* ── 4. HERO ──────────────────────────────────────────────── */
 export const HERO = {
   /* El titular se parte en 3 para animar la palabra destacada */
-  titleStart: 'Hacemos que tu tienda',
+  titleStart: 'Hacemos que tu Shopify',
   titleHighlight: 'venda más',
   titleEnd: 'con el tráfico que ya tienes.',
   subtitle:
-    'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas online para convertirlas en máquinas de vender.',
+    'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas Shopify para convertirlas en máquinas de vender.',
   cta: 'Quiero una web que venda más',
+  /* Sello de especialización que va bajo el CTA */
+  platformBadge: 'Especialistas en Shopify',
 } as const
 
 /* ── 5. CLIENTES ──────────────────────────────────────────────
@@ -85,13 +87,13 @@ export const CLIENTS: Client[] = [
 export const PROBLEMS = {
   title: '¿Por qué tu tienda no vende lo que debería?',
   subtitle:
-    'Estos son los problemas que hacen que tu tienda pierda dinero cada día.',
+    'Estos son los problemas que hacen que tu tienda Shopify pierda dinero cada día.',
   cta: 'Quiero solucionar estos problemas',
   items: [
     {
       id: 'plantilla',
       title: 'Una plantilla genérica',
-      body: 'Usas el mismo tema que otras mil tiendas. No comunicas tu propuesta de valor y no te diferencias de tu competencia.',
+      body: 'Usas el mismo tema de Shopify que otras mil tiendas. No comunicas tu propuesta de valor y no te diferencias de tu competencia.',
     },
     {
       id: 'margen',
@@ -116,7 +118,7 @@ export const PROBLEMS = {
     {
       id: 'apps',
       title: 'Aplicaciones innecesarias',
-      body: 'Apps de terceros cobrándote cada mes. Ralentizan tu web, no se integran entre sí y puedes prescindir del 90%.',
+      body: 'Apps del App Store de Shopify cobrándote cada mes. Ralentizan tu web, no se integran entre sí y puedes prescindir del 90%.',
     },
     {
       id: 'velocidad',
@@ -162,15 +164,19 @@ export const CALCULATOR = {
   subtitle:
     'Pequeñas mejoras en las métricas clave transforman tu cuenta de resultados sin aumentar un peso de inversión publicitaria.',
   cta: 'Quiero mejorar mi tasa de conversión',
-  /* Valores de arranque de los sliders (mercado colombiano, COP) */
+  /* Valores de arranque de los sliders (mercado colombiano, COP).
+     Los 4 están vinculados: pedidos = sesiones × conversión / 100.
+     Al mover uno, se recalcula el que corresponda. */
   defaults: {
     sessions: 50_000,
-    conversionRate: 1.5, // %
+    orders: 750,
+    conversionRate: 1.5, // % — coherente: 50.000 × 1,5% = 750
     averageOrderValue: 180_000, // COP
   },
   /* Rangos de los sliders */
   ranges: {
     sessions: { min: 1_000, max: 500_000, step: 1_000 },
+    orders: { min: 10, max: 20_000, step: 10 },
     conversionRate: { min: 0.2, max: 6, step: 0.1 },
     averageOrderValue: { min: 20_000, max: 1_000_000, step: 10_000 },
   },
@@ -218,7 +224,7 @@ export const FAQ = {
   items: [
     {
       q: '¿Solo hacen tiendas online?',
-      a: 'Nos especializamos en ecommerce, porque es donde generamos más impacto. También trabajamos landing pages de alta conversión y optimización CRO sobre tiendas ya existentes.',
+      a: 'Nos especializamos en ecommerce sobre Shopify, porque es donde generamos más impacto. También trabajamos landing pages de alta conversión y optimización CRO sobre tiendas ya existentes.',
     },
     {
       q: '¿Qué es la auditoría CRO?',
@@ -245,7 +251,7 @@ export const FAQ = {
 
 /* ── 12. CTA FINAL ────────────────────────────────────────── */
 export const FINAL_CTA = {
-  title: 'Hagamos que tu tienda facture el doble.',
+  title: 'Hagamos que tu Shopify facture el doble.',
   subtitle: 'Sin doblar el presupuesto en ads.',
   cta: 'Agenda tu diagnóstico gratuito',
 } as const

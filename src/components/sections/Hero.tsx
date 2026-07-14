@@ -157,6 +157,24 @@ export function Hero() {
               </span>
             </motion.div>
           </motion.div>
+
+          {/* Sello de plataforma */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 1.4 }}
+            className="flex items-center gap-2.5"
+          >
+            <img
+              src="/logos/shopify.avif"
+              alt=""
+              aria-hidden="true"
+              className="h-6 w-auto"
+            />
+            <span className="text-xs font-medium text-faint">
+              {HERO.platformBadge}
+            </span>
+          </motion.div>
         </div>
 
         {/* ── Columna visual ── */}
