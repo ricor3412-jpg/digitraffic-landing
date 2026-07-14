@@ -33,11 +33,14 @@ export function Footer() {
   return (
     <footer className="border-t border-line px-5 py-12 sm:px-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:flex-row md:justify-between">
-        <img
-          src="/brand/logo-horizontal.svg"
-          alt="Digitraffic"
-          className="h-7 w-auto"
-        />
+        {/* Mismo motivo que en el Navbar: el logo horizontal es ilegible
+            sobre fondo oscuro. Componemos isotipo + nombre. */}
+        <a href="#hero" className="flex items-center gap-2.5">
+          <img src="/brand/isotipo.svg" alt="" aria-hidden="true" className="h-7 w-auto" />
+          <span className="font-display text-lg font-bold tracking-tight text-bone">
+            digitraffic
+          </span>
+        </a>
 
         <nav aria-label="Pie de página">
           <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">

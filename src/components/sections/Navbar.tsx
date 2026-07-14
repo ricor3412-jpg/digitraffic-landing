@@ -24,13 +24,18 @@ export function Navbar() {
             : 'border-transparent bg-transparent'
         }`}
       >
-        {/* Logo */}
-        <a href="#hero" className="shrink-0" aria-label="Digitraffic — inicio">
-          <img
-            src="/brand/logo-horizontal.svg"
-            alt="Digitraffic"
-            className="h-7 w-auto"
-          />
+        {/* Logo. Ojo: logo-horizontal.svg trae el texto en #161F2A (casi negro),
+            así que sobre fondo oscuro es ilegible. Usamos el isotipo —que sí lleva
+            el degradado de marca— y componemos el nombre en texto blanco. */}
+        <a
+          href="#hero"
+          className="flex shrink-0 items-center gap-2.5"
+          aria-label="Digitraffic — inicio"
+        >
+          <img src="/brand/isotipo.svg" alt="" aria-hidden="true" className="h-7 w-auto" />
+          <span className="font-display text-lg font-bold tracking-tight text-bone">
+            digitraffic
+          </span>
         </a>
 
         {/* Enlaces (escritorio) */}

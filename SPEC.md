@@ -77,11 +77,18 @@ El orden de las secciones **es** el argumento de venta:
 - [x] Build de producción limpio: 436 módulos, 120 KB gzip, 0 errores
 - [x] Verificación funcional con Playwright: React monta, 9 secciones, calculadora
       recalcula en vivo (21.250 € → 212.500 € al mover el slider), 0 errores en consola
+- [x] Repositorio git inicializado, rama `main`, commit inicial
+- [x] Documentación: README.md, CLAUDE.md, SPEC.md
+- [x] **Bug corregido:** el logo era ilegible sobre fondo oscuro. `logo-horizontal.svg`
+      trae el texto en `#161F2A` (casi negro). Sustituido en navbar y footer por
+      isotipo (que sí lleva el degradado) + nombre en texto blanco.
+- [x] Encuadre del hero verificado a 1440×900, 1920×1080 y 390×844: el navbar nunca
+      tapa el titular, el CTA se ve sin scroll y no hay scroll horizontal.
 
 ### Pendiente ⏳
 
-- [ ] **Repositorio git** — pendiente de `git init` + primer commit
-- [ ] Conectar a GitHub y desplegar en Vercel
+- [ ] Conectar a GitHub (`git remote add origin …` + `git push -u origin main`)
+- [ ] Importar el repo en Vercel y desplegar
 
 ---
 
