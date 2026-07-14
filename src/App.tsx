@@ -5,14 +5,13 @@ import { Clients } from '@/components/sections/Clients'
 import { Problems } from '@/components/sections/Problems'
 import { Solutions } from '@/components/sections/Solutions'
 import { Calculator } from '@/components/sections/Calculator'
-import { Guarantee } from '@/components/sections/Guarantee'
 import { Methodology } from '@/components/sections/Methodology'
 import { Faq } from '@/components/sections/Faq'
 import { FinalCta, Footer } from '@/components/sections/FinalCta'
 
 /* El orden de las secciones ES el recorrido de persuasión:
    promesa → prueba social → dolor → solución → cuantificar la pérdida
-   → quitar el riesgo → cómo lo hacemos → objeciones → cierre  */
+   → cómo lo hacemos → objeciones → cierre  */
 
 export default function App() {
   return (
@@ -25,7 +24,6 @@ export default function App() {
         <Problems />
         <Solutions />
         <Calculator />
-        <Guarantee />
         <Methodology />
         <Faq />
         <FinalCta />

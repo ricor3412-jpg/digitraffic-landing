@@ -5,8 +5,9 @@ import { Pulse, Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { Counter } from '@/components/ui/Counter'
 import { CALCULATOR } from '@/lib/config'
+import { CURRENCY, formatCOP, splitCOPShort } from '@/lib/money'
 
-const { defaults, upliftPoints, currency } = CALCULATOR
+const { defaults, ranges, upliftPoints } = CALCULATOR
 
 /* ── Slider con etiqueta y valor en vivo ─────────────────────── */
 function Slider({
@@ -67,6 +68,18 @@ function Slider({
   )
 }
 
+/** Cifra grande en COP abreviado, con el número animado. */
+function BigMoney({ value, className }: { value: number; className?: string }) {
+  const { amount, decimals, unit } = splitCOPShort(value)
+
+  return (
+    <span className={className}>
+      <span className="mr-1 text-[0.6em] align-top">{CURRENCY}</span>
+      <Counter value={amount} decimals={decimals} suffix={unit} />
+    </span>
+  )
+}
+
 export function Calculator() {
   const reduce = useReducedMotion()
 
@@ -76,42 +89,42 @@ export function Calculator() {
   const [cvr, setCvr] = useState<number>(defaults.conversionRate)
   const [aov, setAov] = useState<number>(defaults.averageOrderValue)
 
-  /* Cálculo: facturación actual vs. facturación con la mejora de CRO.
-     La diferencia es el dinero que el visitante está dejando de ganar. */
-  const { currentRevenue, upliftRevenue, monthlyLoss, yearlyLoss, orders, score } =
-    useMemo(() => {
-      const orders = (sessions * cvr) / 100
-      const currentRevenue = orders * aov
+  /* El modelo es RELACIONAL: los pedidos no son un dato suelto, salen de
+     sesiones × conversión. Por eso, al subir la conversión suben también los
+     pedidos, y con ellos la facturación. Eso es justo lo que vendemos. */
+  const m = useMemo(() => {
+    const orders = (sessions * cvr) / 100
+    const revenue = orders * aov
 
-      const improvedCvr = cvr + upliftPoints
-      const improvedOrders = (sessions * improvedCvr) / 100
-      const upliftRevenue = improvedOrders * aov
+    const cvrUp = cvr + upliftPoints
+    const ordersUp = (sessions * cvrUp) / 100
+    const revenueUp = ordersUp * aov
 
-      const monthlyLoss = upliftRevenue - currentRevenue
+    const extraOrders = ordersUp - orders
+    const monthlyLoss = revenueUp - revenue
 
-      /* Puntuación CRO 0–100: penaliza tasas de conversión bajas.
-         Referencia del sector: ~3% es bueno en ecommerce. */
-      const score = Math.max(4, Math.min(100, Math.round((cvr / 3) * 100)))
+    /* Puntuación CRO 0–100. Referencia del sector: ~3 % es bueno en ecommerce. */
+    const score = Math.max(4, Math.min(100, Math.round((cvr / 3) * 100)))
 
-      return {
-        currentRevenue,
-        upliftRevenue,
-        monthlyLoss,
-        yearlyLoss: monthlyLoss * 12,
-        orders,
-        score,
-      }
-    }, [sessions, cvr, aov])
+    return {
+      orders,
+      revenue,
+      cvrUp,
+      ordersUp,
+      revenueUp,
+      extraOrders,
+      monthlyLoss,
+      yearlyLoss: monthlyLoss * 12,
+      score,
+    }
+  }, [sessions, cvr, aov])
 
   const verdict =
-    score >= 75
+    m.score >= 75
       ? { label: 'Vas bien, pero hay margen', tone: 'text-gain' }
-      : score >= 40
+      : m.score >= 40
         ? { label: 'Estás dejando dinero sobre la mesa', tone: 'text-amber-400' }
         : { label: 'Estás perdiendo dinero', tone: 'text-danger' }
-
-  const fmtMoney = (v: number) =>
-    `${Math.round(v).toLocaleString('es-ES')} ${currency}`
 
   return (
     <Section id="calculadora">
@@ -143,61 +156,64 @@ export function Calculator() {
               <Slider
                 label="Sesiones / mes"
                 value={sessions}
-                min={1000}
-                max={500_000}
-                step={1000}
+                min={ranges.sessions.min}
+                max={ranges.sessions.max}
+                step={ranges.sessions.step}
                 onChange={setSessions}
-                format={(v) => v.toLocaleString('es-ES')}
+                format={(v) => v.toLocaleString('es-CO')}
               />
               <Slider
                 label="Tasa de conversión"
                 value={cvr}
-                min={0.2}
-                max={6}
-                step={0.1}
+                min={ranges.conversionRate.min}
+                max={ranges.conversionRate.max}
+                step={ranges.conversionRate.step}
                 onChange={setCvr}
                 format={(v) => `${v.toFixed(1)} %`}
               />
               <Slider
-                label="Ticket medio"
+                label="Ticket promedio"
                 value={aov}
-                min={10}
-                max={400}
-                step={5}
+                min={ranges.averageOrderValue.min}
+                max={ranges.averageOrderValue.max}
+                step={ranges.averageOrderValue.step}
                 onChange={setAov}
-                format={(v) => `${v} ${currency}`}
+                format={formatCOP}
               />
             </div>
 
-            {/* Resumen de pedidos y facturación actual */}
-            <div className="mt-8 grid grid-cols-2 gap-4 border-t border-line pt-6">
-              <div>
-                <p className="text-xs text-faint">Pedidos / mes</p>
-                <Counter
-                  value={orders}
-                  className="mt-1 block text-xl font-bold text-bone tabular-nums"
-                />
-              </div>
-              <div>
-                <p className="text-xs text-faint">Facturación actual</p>
-                <Counter
-                  value={currentRevenue}
-                  suffix={` ${currency}`}
-                  className="mt-1 block text-xl font-bold text-bone tabular-nums"
-                />
+            {/* Resultado derivado: se ve que los pedidos SALEN de los sliders */}
+            <div className="mt-8 border-t border-line pt-6">
+              <p className="mb-4 font-mono text-[10px] tracking-wide text-faint uppercase">
+                sesiones × conversión = pedidos
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-faint">Pedidos / mes</p>
+                  <Counter
+                    value={m.orders}
+                    className="mt-1 block text-xl font-bold text-bone tabular-nums"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-faint">Facturación actual</p>
+                  <BigMoney
+                    value={m.revenue}
+                    className="mt-1 block text-xl font-bold text-bone tabular-nums"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* ── Panel de resultados ── */}
           <div className="relative overflow-hidden rounded-3xl border border-magenta/30 bg-gradient-to-br from-surface to-void p-7 sm:p-8">
-            {/* Resplandor de fondo */}
             <div
               className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-magenta/20 blur-[80px]"
               aria-hidden="true"
             />
 
-            <div className="relative flex h-full flex-col gap-7">
+            <div className="relative flex h-full flex-col gap-6">
               {/* Puntuación CRO */}
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -209,7 +225,6 @@ export function Calculator() {
                   </p>
                 </div>
 
-                {/* Anillo de puntuación */}
                 <div className="relative h-20 w-20 shrink-0">
                   <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90">
                     <circle
@@ -230,15 +245,14 @@ export function Calculator() {
                       strokeLinecap="round"
                       strokeDasharray={2 * Math.PI * 34}
                       animate={{
-                        strokeDashoffset:
-                          2 * Math.PI * 34 * (1 - score / 100),
+                        strokeDashoffset: 2 * Math.PI * 34 * (1 - m.score / 100),
                       }}
                       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Counter
-                      value={score}
+                      value={m.score}
                       className="text-xl font-bold text-bone tabular-nums"
                     />
                   </div>
@@ -265,46 +279,92 @@ export function Calculator() {
                   <Pulse className="bg-danger" size="h-1.5 w-1.5" />
                   Dejas de ganar cada mes
                 </p>
-                <Counter
-                  value={monthlyLoss}
-                  suffix={` ${currency}`}
+                <BigMoney
+                  value={m.monthlyLoss}
                   className="mt-2 block text-4xl font-bold text-danger tabular-nums sm:text-5xl"
                 />
                 <p className="mt-3 text-sm text-muted">
                   Es decir,{' '}
                   <span className="font-semibold text-bone">
-                    {fmtMoney(yearlyLoss)}
+                    {formatCOP(m.yearlyLoss)}
                   </span>{' '}
                   al año que se te escapan.
                 </p>
               </motion.div>
 
-              {/* Comparativa */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-line bg-void/60 p-4">
-                  <p className="text-xs text-faint">Hoy</p>
-                  <Counter
-                    value={currentRevenue}
-                    suffix={` ${currency}`}
-                    className="mt-1 block text-lg font-bold text-muted tabular-nums"
-                  />
-                </div>
-                <div className="rounded-2xl border border-gain/30 bg-gain/[0.07] p-4">
-                  <p className="text-xs text-gain">
-                    Con +{upliftPoints}% conversión
-                  </p>
-                  <Counter
-                    value={upliftRevenue}
-                    suffix={` ${currency}`}
-                    className="mt-1 block text-lg font-bold text-gain tabular-nums"
-                  />
+              {/* Comparativa: aquí se ve que TODO sube en cadena */}
+              <div className="overflow-hidden rounded-2xl border border-line">
+                <div className="grid grid-cols-3 gap-px bg-line">
+                  <div className="bg-void/70 p-3">
+                    <p className="text-[10px] text-faint">&nbsp;</p>
+                  </div>
+                  <div className="bg-void/70 p-3">
+                    <p className="text-[10px] font-semibold text-muted">Hoy</p>
+                  </div>
+                  <div className="bg-gain/[0.08] p-3">
+                    <p className="text-[10px] font-semibold whitespace-nowrap text-gain">
+                      +{upliftPoints} pts
+                    </p>
+                  </div>
+
+                  {/* Conversión */}
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <p className="text-[11px] text-faint">Conversión</p>
+                  </div>
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <span className="font-mono text-[13px] font-semibold text-muted tabular-nums">
+                      {cvr.toFixed(1)} %
+                    </span>
+                  </div>
+                  <div className="bg-gain/[0.08] px-3 py-2.5">
+                    <span className="font-mono text-[13px] font-bold text-gain tabular-nums">
+                      {m.cvrUp.toFixed(1)} %
+                    </span>
+                  </div>
+
+                  {/* Pedidos — el eslabón que faltaba */}
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <p className="text-[11px] text-faint">Pedidos</p>
+                  </div>
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <Counter
+                      value={m.orders}
+                      className="font-mono text-[13px] font-semibold text-muted tabular-nums"
+                    />
+                  </div>
+                  <div className="bg-gain/[0.08] px-3 py-2.5">
+                    <Counter
+                      value={m.ordersUp}
+                      className="font-mono text-[13px] font-bold text-gain tabular-nums"
+                    />
+                  </div>
+
+                  {/* Facturación */}
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <p className="text-[11px] text-faint">Facturación</p>
+                  </div>
+                  <div className="bg-void/70 px-3 py-2.5">
+                    <BigMoney
+                      value={m.revenue}
+                      className="font-mono text-[13px] font-semibold text-muted tabular-nums"
+                    />
+                  </div>
+                  <div className="bg-gain/[0.08] px-3 py-2.5">
+                    <BigMoney
+                      value={m.revenueUp}
+                      className="font-mono text-[13px] font-bold text-gain tabular-nums"
+                    />
+                  </div>
                 </div>
               </div>
 
               <p className="text-xs leading-relaxed text-faint">
-                Subir tu conversión solo {upliftPoints} puntos porcentuales —sin
-                gastar un euro más en publicidad— cambia por completo tu cuenta de
-                resultados.
+                Subir la conversión {upliftPoints} puntos son{' '}
+                <span className="font-semibold text-bone">
+                  <Counter value={m.extraOrders} decimals={0} /> pedidos más
+                </span>{' '}
+                cada mes con el mismo tráfico. Sin gastar un peso más en
+                publicidad.
               </p>
 
               <div className="mt-auto pt-2">

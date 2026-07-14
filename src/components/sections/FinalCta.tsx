@@ -11,7 +11,7 @@ export function FinalCta() {
 
       <Reveal className="relative mx-auto flex max-w-3xl flex-col items-center gap-7 text-center">
         <h2 className="text-3xl leading-[1.1] font-bold sm:text-5xl md:text-6xl">
-          Hagamos que tu Shopify{' '}
+          Hagamos que tu tienda{' '}
           <span className="text-gradient">facture el doble</span>.
         </h2>
 

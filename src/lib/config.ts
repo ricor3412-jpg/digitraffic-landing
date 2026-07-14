@@ -45,36 +45,47 @@ export const NAV_LINKS = [
 /* ── 4. HERO ──────────────────────────────────────────────── */
 export const HERO = {
   /* El titular se parte en 3 para animar la palabra destacada */
-  titleStart: 'Hacemos que tu Shopify',
+  titleStart: 'Hacemos que tu tienda',
   titleHighlight: 'venda más',
   titleEnd: 'con el tráfico que ya tienes.',
   subtitle:
-    'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas Shopify para convertirlas en máquinas de vender.',
+    'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas online para convertirlas en máquinas de vender.',
   cta: 'Quiero una web que venda más',
 } as const
 
 /* ── 5. CLIENTES ──────────────────────────────────────────────
+   Tarjetas rectangulares: una foto de fondo con el logo encima.
+
    ⚠️ TODO: reemplaza con tus clientes reales.
-   Pon los logos en /public/clients/ y apunta `logo` a la ruta.
-   Si `logo` es null, se pinta el nombre como texto (placeholder).
+   · image → foto en /public/clients/ (vertical, ~3:4). Si es null se pinta
+     un degradado de marca como placeholder.
+   · logo  → SVG/PNG blanco en /public/clients/. Si es null se escribe el
+     nombre en texto.
    ─────────────────────────────────────────────────────────── */
 export const CLIENTS_HEADLINE =
-  'Marcas que ya venden más con nosotros'
+  'Algunas de las marcas con las que hemos trabajado estos últimos 7 años'
 
-export const CLIENTS: { name: string; logo: string | null }[] = [
-  { name: 'Cliente Uno', logo: null }, // ⚠️ TODO
-  { name: 'Cliente Dos', logo: null }, // ⚠️ TODO
-  { name: 'Cliente Tres', logo: null }, // ⚠️ TODO
-  { name: 'Cliente Cuatro', logo: null }, // ⚠️ TODO
-  { name: 'Cliente Cinco', logo: null }, // ⚠️ TODO
-  { name: 'Cliente Seis', logo: null }, // ⚠️ TODO
+export type Client = {
+  name: string
+  image: string | null
+  logo: string | null
+}
+
+export const CLIENTS: Client[] = [
+  { name: 'Cliente Uno', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Dos', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Tres', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Cuatro', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Cinco', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Seis', image: null, logo: null }, // ⚠️ TODO
+  { name: 'Cliente Siete', image: null, logo: null }, // ⚠️ TODO
 ]
 
 /* ── 6. PROBLEMAS (agitación del dolor) ───────────────────── */
 export const PROBLEMS = {
   title: '¿Por qué tu tienda no vende lo que debería?',
   subtitle:
-    'Estos son los problemas que hacen que tu Shopify pierda dinero cada día.',
+    'Estos son los problemas que hacen que tu tienda pierda dinero cada día.',
   cta: 'Quiero solucionar estos problemas',
   items: [
     {
@@ -149,27 +160,25 @@ export const SOLUTIONS = {
 export const CALCULATOR = {
   title: 'Calcula cuánto dejas de ganar cada mes',
   subtitle:
-    'Pequeñas mejoras en las métricas clave transforman tu cuenta de resultados sin aumentar un euro de inversión publicitaria.',
+    'Pequeñas mejoras en las métricas clave transforman tu cuenta de resultados sin aumentar un peso de inversión publicitaria.',
   cta: 'Quiero mejorar mi tasa de conversión',
-  /* Valores de arranque de los sliders */
+  /* Valores de arranque de los sliders (mercado colombiano, COP) */
   defaults: {
     sessions: 50_000,
     conversionRate: 1.5, // %
-    averageOrderValue: 85, // €
+    averageOrderValue: 180_000, // COP
+  },
+  /* Rangos de los sliders */
+  ranges: {
+    sessions: { min: 1_000, max: 500_000, step: 1_000 },
+    conversionRate: { min: 0.2, max: 6, step: 0.1 },
+    averageOrderValue: { min: 20_000, max: 1_000_000, step: 10_000 },
   },
   /* Mejora de conversión que prometemos (en puntos porcentuales) */
   upliftPoints: 0.5,
-  currency: '€',
 } as const
 
-/* ── 9. GARANTÍA ──────────────────────────────────────────── */
-export const GUARANTEE = {
-  title: 'Garantía contractual de resultados',
-  body: 'Si tu conversión no sube tras rehacer tu web, seguimos trabajando gratis hasta conseguirlo. No cobramos por horas. Cobramos por resultados.',
-  cta: 'Quiero más conversión asegurada',
-} as const
-
-/* ── 10. METODOLOGÍA ──────────────────────────────────────── */
+/* ── 9. METODOLOGÍA ──────────────────────────────────────── */
 export const METHODOLOGY = {
   title: 'Nuestra metodología',
   subtitle:
@@ -203,20 +212,20 @@ export const METHODOLOGY = {
   ],
 } as const
 
-/* ── 11. FAQ ──────────────────────────────────────────────── */
+/* ── 10. FAQ ──────────────────────────────────────────────── */
 export const FAQ = {
   title: 'Preguntas frecuentes',
   items: [
     {
-      q: '¿Solo hacéis tiendas online?',
-      a: 'Nos especializamos en ecommerce sobre Shopify, porque es donde generamos más impacto. También trabajamos landing pages de alta conversión y optimización CRO sobre tiendas ya existentes.',
+      q: '¿Solo hacen tiendas online?',
+      a: 'Nos especializamos en ecommerce, porque es donde generamos más impacto. También trabajamos landing pages de alta conversión y optimización CRO sobre tiendas ya existentes.',
     },
     {
       q: '¿Qué es la auditoría CRO?',
       a: 'Es un análisis con datos de tu tienda: dónde abandonan los usuarios, qué fricciones hay en el checkout, qué puntos de decisión están mal resueltos. De ahí sale un plan priorizado por impacto sobre tu facturación.',
     },
     {
-      q: '¿Cuánto tardáis en diseñar y desarrollar la tienda?',
+      q: '¿Cuánto tardan en diseñar y desarrollar la tienda?',
       a: 'El proceso completo lleva entre 5 y 8 semanas, dividido en cuatro fases: onboarding, auditoría CRO, diseño y desarrollo.',
     },
     {
@@ -224,7 +233,7 @@ export const FAQ = {
       a: 'Tienes un canal directo con el equipo y reuniones de seguimiento periódicas. Nada de esperar días por una respuesta.',
     },
     {
-      q: '¿Recibiré asesoramiento para mejorar mi estrategia?',
+      q: '¿Recibo asesoramiento para mejorar mi estrategia?',
       a: 'Sí. No solo entregamos una web: te acompañamos con recomendaciones de estrategia de conversión, retención y ticket medio.',
     },
     {
@@ -236,7 +245,7 @@ export const FAQ = {
 
 /* ── 12. CTA FINAL ────────────────────────────────────────── */
 export const FINAL_CTA = {
-  title: 'Hagamos que tu Shopify facture el doble.',
+  title: 'Hagamos que tu tienda facture el doble.',
   subtitle: 'Sin doblar el presupuesto en ads.',
   cta: 'Agenda tu diagnóstico gratuito',
 } as const

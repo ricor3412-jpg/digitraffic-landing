@@ -1,6 +1,7 @@
 import { motion, useMotionValue, useReducedMotion } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Section, SectionHeader } from '@/components/ui/Section'
-import { Stagger, StaggerItem, Reveal } from '@/components/ui/Motion'
+import { Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { PROBLEM_MOCKUPS } from '@/components/svg/Mockups'
 import { PROBLEMS } from '@/lib/config'
@@ -75,10 +76,10 @@ function ProblemCard({
   }
 
   return (
-    <StaggerItem className="h-full">
+    <li className="w-[300px] shrink-0 snap-start sm:w-[340px]">
       <div
         onMouseMove={handleMouseMove}
-        className="group relative h-full overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40"
+        className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40"
       >
         {/* Resplandor que sigue al cursor */}
         {!reduce && (
@@ -96,8 +97,8 @@ function ProblemCard({
 
         <div className="relative flex h-full flex-col gap-4">
           {/* Escena: muestra el problema en vez de describirlo */}
-          <div className="min-h-[124px] rounded-2xl border border-line/60 bg-void/50 p-3">
-            {PROBLEM_MOCKUPS[id]}
+          <div className="flex min-h-[132px] items-center rounded-2xl border border-line/60 bg-void/50 p-3">
+            <div className="w-full">{PROBLEM_MOCKUPS[id]}</div>
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -127,32 +128,105 @@ function ProblemCard({
           </span>
         </div>
       </div>
-    </StaggerItem>
+    </li>
   )
 }
 
 export function Problems() {
+  const scrollerRef = useRef<HTMLUListElement>(null)
+  const [atStart, setAtStart] = useState(true)
+  const [atEnd, setAtEnd] = useState(false)
+
+  /* Sabe si hay más tarjetas a izquierda o derecha, para atenuar las flechas. */
+  const updateEdges = useCallback(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    setAtStart(el.scrollLeft <= 8)
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 8)
+  }, [])
+
+  useEffect(() => {
+    updateEdges()
+    window.addEventListener('resize', updateEdges)
+    return () => window.removeEventListener('resize', updateEdges)
+  }, [updateEdges])
+
+  function scrollBy(dir: 1 | -1) {
+    const el = scrollerRef.current
+    if (!el) return
+    /* Avanza de dos en dos tarjetas */
+    const card = el.querySelector('li')?.clientWidth ?? 320
+    el.scrollBy({ left: dir * card * 2, behavior: 'smooth' })
+  }
+
   return (
     <Section id="problemas">
-      <SectionHeader
-        eyebrow="El diagnóstico"
-        title={
-          <>
-            ¿Por qué tu tienda{' '}
-            <span className="text-danger">no vende lo que debería</span>?
-          </>
-        }
-        subtitle={PROBLEMS.subtitle}
-      />
+      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <SectionHeader
+          align="left"
+          eyebrow="El diagnóstico"
+          title={
+            <>
+              ¿Por qué tu tienda{' '}
+              <span className="text-danger">no vende lo que debería</span>?
+            </>
+          }
+          subtitle={PROBLEMS.subtitle}
+        />
 
-      {/* 2 columnas (no 3): los mockups necesitan sitio para respirar */}
-      <Stagger className="mt-16 grid gap-5 md:grid-cols-2">
-        {PROBLEMS.items.map((p, i) => (
-          <ProblemCard key={p.id} {...p} index={i} />
-        ))}
-      </Stagger>
+        {/* Flechas de navegación */}
+        <Reveal className="flex shrink-0 gap-2">
+          {[
+            { dir: -1 as const, label: 'Anterior', disabled: atStart, d: 'M15 5l-7 7 7 7' },
+            { dir: 1 as const, label: 'Siguiente', disabled: atEnd, d: 'M9 5l7 7-7 7' },
+          ].map((btn) => (
+            <button
+              key={btn.label}
+              type="button"
+              onClick={() => scrollBy(btn.dir)}
+              disabled={btn.disabled}
+              aria-label={btn.label}
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface/60 text-bone transition-all duration-300 hover:border-magenta hover:bg-magenta/10 disabled:cursor-default disabled:opacity-30 disabled:hover:border-line disabled:hover:bg-surface/60"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d={btn.d} />
+              </svg>
+            </button>
+          ))}
+        </Reveal>
+      </div>
 
-      <Reveal className="mt-14 flex justify-center" delay={0.15}>
+      {/* Carrusel horizontal: los 7 problemas caben en una sola sección */}
+      <div className="relative mt-12 -mx-5 sm:-mx-8">
+        <ul
+          ref={scrollerRef}
+          onScroll={updateEdges}
+          className="flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {PROBLEMS.items.map((p, i) => (
+            <ProblemCard key={p.id} {...p} index={i} />
+          ))}
+        </ul>
+
+        {/* Difuminado en el borde derecho: insinúa que hay más */}
+        {!atEnd && (
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-void to-transparent sm:w-24"
+            aria-hidden="true"
+          />
+        )}
+      </div>
+
+      <Reveal className="mt-12 flex justify-center" delay={0.1}>
         <CTAButton>{PROBLEMS.cta}</CTAButton>
       </Reveal>
     </Section>

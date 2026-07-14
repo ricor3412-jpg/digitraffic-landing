@@ -219,7 +219,7 @@ export function MockRisingCAC() {
             transition={{ duration: 2, repeat: Infinity }}
             className="font-mono text-xl font-bold text-danger"
           >
-            <Counter value={38} suffix=" €" />
+            <Counter value={38} prefix="$ " suffix=" K" />
           </motion.span>
         </div>
         <div className="mt-0.5 flex items-center gap-0.5">
@@ -294,7 +294,7 @@ export function MockFlatAOV() {
       <div className="flex items-center justify-between border-t border-line/60 pt-1.5">
         <span className="text-[8px] text-faint">Total</span>
         <span className="font-mono text-xs font-bold text-danger">
-          <Counter value={24} suffix=" €" />
+          <Counter value={89} prefix="$ " suffix=" K" />
         </span>
       </div>
     </div>
@@ -304,10 +304,10 @@ export function MockFlatAOV() {
 /* ── 6. APPS INNECESARIAS ────────────────────────────────────────
    Pila de apps, cada una con su cuota mensual. */
 const APPS = [
-  { name: 'Reviews Pro', price: 29 },
-  { name: 'Upsell King', price: 49 },
-  { name: 'Popup Master', price: 19 },
-  { name: 'Mega Search', price: 39 },
+  { name: 'Reviews Pro', price: 120 },
+  { name: 'Upsell King', price: 195 },
+  { name: 'Popup Master', price: 78 },
+  { name: 'Mega Search', price: 155 },
 ]
 
 export function MockApps() {
@@ -328,7 +328,7 @@ export function MockApps() {
           <div className="h-3 w-3 shrink-0 rounded bg-line/50" />
           <span className="flex-1 truncate text-[8px] text-muted">{app.name}</span>
           <span className="font-mono text-[8px] font-semibold text-danger">
-            -{app.price} €
+            $ {app.price} K
           </span>
         </motion.div>
       ))}
@@ -340,7 +340,7 @@ export function MockApps() {
       >
         <span className="text-[8px] font-semibold text-danger">Cada mes</span>
         <span className="font-mono text-[10px] font-bold text-danger">
-          -{total} €
+          $ {total} K
         </span>
       </motion.div>
     </div>

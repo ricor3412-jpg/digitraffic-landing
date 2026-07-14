@@ -38,14 +38,24 @@ El orden de las secciones **es** el argumento de venta:
 | # | Sección      | Función psicológica                                             |
 | - | ------------ | --------------------------------------------------------------- |
 | 1 | Hero         | Promesa de eficiencia ("el tráfico que *ya tienes*") + escasez.  |
-| 2 | Clientes     | Prueba social inmediata.                                        |
-| 3 | Problemas    | Agita el dolor: 7 fallos concretos y caros.                     |
+| 2 | Clientes     | Prueba social: carrusel de tarjetas con foto + logo.             |
+| 3 | Problemas    | Agita el dolor: 7 fallos, en carrusel horizontal con escenas.    |
 | 4 | Soluciones   | Espeja cada dolor con su remedio.                               |
-| 5 | Calculadora  | **Pieza clave.** El visitante ve en vivo cuánto pierde.         |
-| 6 | Garantía     | Elimina el riesgo percibido.                                    |
-| 7 | Metodología  | Demuestra proceso, no improvisación.                            |
-| 8 | FAQ          | Derriba las últimas objeciones.                                 |
-| 9 | CTA final    | El cierre.                                                      |
+| 5 | Calculadora  | **Pieza clave.** Modelo relacional: el visitante ve en vivo      |
+|   |              | cómo al subir la conversión suben pedidos Y facturación.         |
+| 6 | Metodología  | Pestañas sincronizadas con el scroll. Cada fase muestra su       |
+|   |              | entregable (el de desarrollo teclea código Liquid).              |
+| 7 | FAQ          | Derriba las últimas objeciones.                                 |
+| 8 | CTA final    | El cierre.                                                      |
+
+**Decisiones de mercado (Colombia):**
+- Moneda: **peso colombiano (COP)**, formateado en `src/lib/money.ts`. Las cifras
+  grandes se abrevian (`$ 12,7 M`) para que no desborden; las exactas usan
+  separador de miles (`$ 180.000`).
+- **No se menciona Shopify** en ninguna parte visible. Digitraffic no se presenta
+  como agencia de una sola plataforma.
+- **No hay sección de garantía contractual.** Se retiró: prometer "trabajamos
+  gratis hasta que suba" es un compromiso que la agencia no quiere adquirir.
 
 **Los CTA escalan con el estado mental del visitante:**
 "Quiero solucionar estos problemas" → "Quiero obtener estos resultados"

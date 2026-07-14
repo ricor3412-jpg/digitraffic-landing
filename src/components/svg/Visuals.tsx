@@ -8,7 +8,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
-/* ── Notificación de venta de Shopify (aparece y flota) ────── */
+/* ── Notificación de venta (aparece y flota) ────── */
 export function SaleNotification() {
   const reduce = useReducedMotion()
 
@@ -39,7 +39,7 @@ export function SaleNotification() {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-bone">Nuevo pedido</p>
           <p className="truncate text-xs text-muted">
-            2 artículos · 70,49 €
+            2 artículos · $ 189.900
           </p>
         </div>
         {/* Punto que late */}
@@ -156,46 +156,46 @@ export function AOVBars() {
 const ORDERS = [
   {
     id: '#16659',
-    name: 'Laura González',
+    name: 'Laura Gutiérrez',
     time: '18:20',
     items: 1,
-    amount: '39,60 €',
+    amount: '$ 96.500',
     tag: 'Compra recurrente',
     paid: true,
   },
   {
     id: '#16658',
-    name: 'Javier Martín',
+    name: 'Andrés Restrepo',
     time: '17:58',
     items: 3,
-    amount: '37,97 €',
+    amount: '$ 142.300',
     tag: null,
     paid: true,
   },
   {
     id: '#16657',
-    name: 'Clara Jiménez',
+    name: 'Valentina Ospina',
     time: '17:25',
     items: 1,
-    amount: '41,80 €',
+    amount: '$ 88.700',
     tag: 'Compra recurrente',
     paid: true,
   },
   {
     id: '#16656',
-    name: 'Patricia Romero',
+    name: 'Camila Zapata',
     time: '17:16',
     items: 2,
-    amount: '72,60 €',
+    amount: '$ 231.400',
     tag: null,
     paid: false,
   },
   {
     id: '#16655',
-    name: 'Roberto Sánchez',
+    name: 'Santiago Herrera',
     time: '16:52',
     items: 1,
-    amount: '43,99 €',
+    amount: '$ 115.900',
     tag: 'Compra recurrente',
     paid: true,
   },
@@ -208,7 +208,7 @@ export function OrdersList() {
 
   return (
     <div className="w-full overflow-hidden rounded-2xl border border-line bg-void/70">
-      {/* Cabecera con pestañas, como el admin de Shopify */}
+      {/* Cabecera con pestañas, tipo panel de pedidos */}
       <div className="flex items-center gap-1 border-b border-line bg-surface-2/40 px-3 py-2">
         {TABS.map((tab, i) => (
           <span
