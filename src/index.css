@@ -1,0 +1,139 @@
+/* ────────────────────────────────────────────────────────────
+   TIPOGRAFÍAS
+   Albert Sans (secundaria/cuerpo) viene de Google Fonts.
+   Oceanwide (primaria/titulares) es comercial y no está en
+   Google Fonts. Si consigues los .woff2, déjalos en
+   /public/fonts/ y este @font-face los tomará automáticamente.
+   Mientras tanto cae con gracia a Albert Sans.
+
+   OJO: las reglas @import deben ir SIEMPRE antes que cualquier
+   otra regla, incluido @import 'tailwindcss'.
+   ──────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300..900;1,300..900&display=swap');
+
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Oceanwide';
+  src:
+    url('/fonts/oceanwide-semibold.woff2') format('woff2'),
+    url('/fonts/oceanwide-semibold.woff') format('woff');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* ── Marca Digitraffic ── */
+  --color-magenta: #ff13cd;
+  --color-magenta-soft: #ff5cdc;
+  --color-magenta-deep: #d100a6;
+  --color-purple: #740075;
+  --color-purple-soft: #a4189f;
+
+  /* ── Superficies (base oscura) ── */
+  --color-void: #0b0f15;
+  --color-ink: #161f2a;
+  --color-surface: #161f2a;
+  --color-surface-2: #1d2734;
+  --color-line: #2a3441;
+
+  /* ── Texto ── */
+  --color-bone: #f1f1f1;
+  --color-muted: #94a3b8;
+  --color-faint: #64748b;
+
+  /* ── Semánticos ── */
+  --color-danger: #ff4d6d;
+  --color-gain: #22d39a;
+
+  /* ── Tipografía ── */
+  --font-display: 'Oceanwide', 'Albert Sans', system-ui, sans-serif;
+  --font-sans: 'Albert Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-magenta);
+    color: white;
+  }
+
+  /* Accesibilidad: respeta a quien pide menos movimiento */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Texto con degradado de marca */
+  .text-gradient {
+    background: linear-gradient(
+      100deg,
+      var(--color-magenta) 0%,
+      var(--color-magenta-soft) 45%,
+      var(--color-purple-soft) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Resplandor magenta */
+  .glow-magenta {
+    box-shadow:
+      0 0 60px -12px rgb(255 19 205 / 0.55),
+      0 0 120px -30px rgb(116 0 117 / 0.5);
+  }
+
+  /* Retícula de fondo sutil */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  /* Borde con degradado para tarjetas destacadas */
+  .border-gradient {
+    background:
+      linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+      linear-gradient(135deg, var(--color-magenta), var(--color-purple)) border-box;
+    border: 1px solid transparent;
+  }
+}
