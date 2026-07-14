@@ -118,51 +118,60 @@ export function Hero() {
             {HERO.subtitle}
           </motion.p>
 
-          {/* CTA + nota manuscrita */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.15, ease: EASE }}
-            className="flex flex-wrap items-center gap-4"
           >
             {/* Imán: el botón se acerca al cursor cuando entra en su zona */}
             <Magnetic radius={80} pull={0.4}>
               <CTAButton size="lg">{HERO.cta}</CTAButton>
             </Magnetic>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.6, duration: 0.6 }}
-              className="flex items-center gap-1.5"
+          {/* Nota manuscrita, DEBAJO del botón: la flecha se curva hacia
+              ARRIBA para apuntarlo. Antes el CTA estaba a su izquierda y la
+              flecha señalaba de lado; al centrar el hero, la nota quedó debajo
+              y la flecha apuntaba al vacío. */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.6, duration: 0.6 }}
+            className="-mt-2 flex items-start gap-1"
+          >
+            <svg
+              viewBox="0 0 44 30"
+              className="h-7 w-11 shrink-0"
+              aria-hidden="true"
             >
-              {/* Flecha dibujada a mano apuntando al botón */}
-              <svg viewBox="0 0 40 24" className="h-6 w-10" aria-hidden="true">
-                <motion.path
-                  d="M37 6 C 28 3, 14 6, 6 15"
-                  fill="none"
-                  stroke="#94a3b8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  initial={{ pathLength: reduce ? 1 : 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.7, delay: 1.7 }}
-                />
-                <motion.path
-                  d="M6 15 l7 -1 M6 15 l2 -6"
-                  fill="none"
-                  stroke="#94a3b8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2.3 }}
-                />
-              </svg>
-              <span className="font-hand text-xl leading-none text-muted">
-                gratis, {CALENDLY_DURATION}
-              </span>
-            </motion.div>
+              {/* Sube desde la palabra y se curva hacia el botón */}
+              <motion.path
+                d="M40 26 C 30 26, 12 24, 7 6"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                initial={{ pathLength: reduce ? 1 : 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.7, delay: 1.7 }}
+              />
+              {/* Punta de flecha, apuntando hacia arriba */}
+              <motion.path
+                d="M7 6 l0.5 7 M7 6 l6 3"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.3 }}
+              />
+            </svg>
+
+            <span className="mt-2.5 font-hand text-xl leading-none text-muted">
+              gratis, {CALENDLY_DURATION}
+            </span>
           </motion.div>
 
         </div>
