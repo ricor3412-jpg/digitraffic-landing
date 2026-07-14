@@ -15,9 +15,6 @@ const H = 420
 const CX = W / 2
 const CY = H / 2
 const R = 62 // radio del disco de la tienda
-/* Las notificaciones son anchas: si nacen justo en el borde del disco, la del
-   carril central aparece encima del logo y lo tapa. Arrancan un poco más allá. */
-const OUT_R = R + 78
 
 /* Cada carril es una curva continua: entra por la izquierda, toca el centro
    y sale por la derecha. La partimos en dos mitades para poder cambiar de
@@ -25,23 +22,23 @@ const OUT_R = R + 78
 const LANES = [
   {
     in: `M -20 60  C 240 70,  380 ${CY - 30}, ${CX - R} ${CY - 18}`,
-    out: `M ${CX + OUT_R} ${CY - 26} C 850 ${CY - 40}, 980 70,  1240 55`,
+    out: `M ${CX + R} ${CY - 18} C 850 ${CY - 40}, 980 70,  1240 55`,
   },
   {
     in: `M -20 150 C 260 150, 390 ${CY - 12}, ${CX - R} ${CY - 8}`,
-    out: `M ${CX + OUT_R} ${CY - 12} C 840 ${CY - 18}, 960 150, 1240 145`,
+    out: `M ${CX + R} ${CY - 8}  C 840 ${CY - 18}, 960 150, 1240 145`,
   },
   {
     in: `M -20 210 C 220 210, 360 ${CY}, ${CX - R} ${CY}`,
-    out: `M ${CX + OUT_R} ${CY}      C 860 ${CY}, 1000 210, 1240 210`,
+    out: `M ${CX + R} ${CY}      C 860 ${CY}, 1000 210, 1240 210`,
   },
   {
     in: `M -20 270 C 260 270, 390 ${CY + 12}, ${CX - R} ${CY + 8}`,
-    out: `M ${CX + OUT_R} ${CY + 12} C 840 ${CY + 18}, 960 270, 1240 275`,
+    out: `M ${CX + R} ${CY + 8}  C 840 ${CY + 18}, 960 270, 1240 275`,
   },
   {
     in: `M -20 360 C 240 350, 380 ${CY + 30}, ${CX - R} ${CY + 18}`,
-    out: `M ${CX + OUT_R} ${CY + 26} C 850 ${CY + 40}, 980 350, 1240 365`,
+    out: `M ${CX + R} ${CY + 18} C 850 ${CY + 40}, 980 350, 1240 365`,
   },
 ]
 
@@ -240,14 +237,17 @@ function Traveler({
         </div>
       </motion.div>
 
-      {/* Fase 2 — sale convertido en pedido, medio ciclo después */}
+      {/* Fase 2 — sale convertido en pedido, medio ciclo después.
+          La línea nace pegada al disco (si no, se despega y se ve el hueco),
+          pero la NOTIFICACIÓN no se hace visible hasta haber recorrido un
+          trecho: es ancha y, si apareciera en el borde, taparía el logo. */}
       <motion.div
         style={{ ...common, offsetPath: `path("${lane.out}")` }}
         initial={{ offsetDistance: '0%', opacity: 0, scale: 0.5 }}
         animate={{
           offsetDistance: ['0%', '100%'],
-          opacity: [0, 1, 1, 1, 0],
-          scale: [0.5, 1.15, 1, 1, 0.8],
+          opacity: [0, 0, 1, 1, 0],
+          scale: [0.5, 0.6, 1, 1, 0.85],
         }}
         transition={{
           duration: HALF,
@@ -255,7 +255,9 @@ function Traveler({
           repeatDelay: HALF,
           delay: delay + HALF, // arranca justo cuando la persona llega al logo
           ease: 'easeOut',
-          times: [0, 0.15, 0.5, 0.85, 1],
+          /* invisible hasta el 22% del recorrido: para entonces ya está
+             despegada del logo */
+          times: [0, 0.22, 0.4, 0.85, 1],
         }}
       >
         {/* Notificación al estilo de las de Shopify: icono de la app a la
