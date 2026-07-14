@@ -15,6 +15,9 @@ const H = 420
 const CX = W / 2
 const CY = H / 2
 const R = 62 // radio del disco de la tienda
+/* Las notificaciones son anchas: si nacen justo en el borde del disco, la del
+   carril central aparece encima del logo y lo tapa. Arrancan un poco más allá. */
+const OUT_R = R + 78
 
 /* Cada carril es una curva continua: entra por la izquierda, toca el centro
    y sale por la derecha. La partimos en dos mitades para poder cambiar de
@@ -22,23 +25,23 @@ const R = 62 // radio del disco de la tienda
 const LANES = [
   {
     in: `M -20 60  C 240 70,  380 ${CY - 30}, ${CX - R} ${CY - 18}`,
-    out: `M ${CX + R} ${CY - 18} C 820 ${CY - 30}, 960 70,  1220 60`,
+    out: `M ${CX + OUT_R} ${CY - 26} C 850 ${CY - 40}, 980 70,  1240 55`,
   },
   {
     in: `M -20 150 C 260 150, 390 ${CY - 12}, ${CX - R} ${CY - 8}`,
-    out: `M ${CX + R} ${CY - 8}  C 810 ${CY - 12}, 940 150, 1220 150`,
+    out: `M ${CX + OUT_R} ${CY - 12} C 840 ${CY - 18}, 960 150, 1240 145`,
   },
   {
     in: `M -20 210 C 220 210, 360 ${CY}, ${CX - R} ${CY}`,
-    out: `M ${CX + R} ${CY}      C 840 ${CY}, 980 210, 1220 210`,
+    out: `M ${CX + OUT_R} ${CY}      C 860 ${CY}, 1000 210, 1240 210`,
   },
   {
     in: `M -20 270 C 260 270, 390 ${CY + 12}, ${CX - R} ${CY + 8}`,
-    out: `M ${CX + R} ${CY + 8}  C 810 ${CY + 12}, 940 270, 1220 270`,
+    out: `M ${CX + OUT_R} ${CY + 12} C 840 ${CY + 18}, 960 270, 1240 275`,
   },
   {
     in: `M -20 360 C 240 350, 380 ${CY + 30}, ${CX - R} ${CY + 18}`,
-    out: `M ${CX + R} ${CY + 18} C 820 ${CY + 30}, 960 350, 1220 360`,
+    out: `M ${CX + OUT_R} ${CY + 26} C 850 ${CY + 40}, 980 350, 1240 365`,
   },
 ]
 
@@ -255,30 +258,32 @@ function Traveler({
           times: [0, 0.15, 0.5, 0.85, 1],
         }}
       >
-        {/* absolute + w-max: se escapa del contenedor de 1px y toma su ancho
-            natural. Sin esto la tarjeta se aplastaba a 19px. */}
-        <div className="absolute top-0 left-0 flex w-max -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-xl border border-magenta/50 bg-[#161f2a] px-2.5 py-1.5 whitespace-nowrap shadow-[0_4px_20px_-2px_rgba(0,0,0,0.8),0_0_24px_-6px_rgba(255,19,205,0.55)]">
-          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gain/20">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-2.5 w-2.5 text-gain"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3.5"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 12.5l4.5 4.5L19 7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span className="text-[clamp(9px,0.9vw,12px)] font-bold text-bone">
-            Pedido
-          </span>
-          <span className="text-[clamp(8px,0.8vw,11px)] font-bold text-magenta-soft">
-            $ 189.900
+        {/* Notificación al estilo de las de Shopify: icono de la app a la
+            izquierda, remitente en negrita, el aviso debajo y la hora en la
+            esquina. Igual que una notificación del móvil.
+
+            absolute + w-max: se escapa del contenedor de 1px que lleva el
+            offsetPath y toma su ancho natural. Sin esto se aplastaba a 19px. */}
+        <div className="absolute top-0 left-0 flex w-[clamp(122px,12vw,158px)] -translate-x-1/2 -translate-y-1/2 items-start gap-1.5 rounded-lg border border-white/[0.08] bg-[#1c2530] px-2 py-1.5 shadow-[0_6px_22px_-6px_rgba(0,0,0,0.9)]">
+          {/* Icono de la app */}
+          <img
+            src="/logos/shopify.avif"
+            alt=""
+            aria-hidden="true"
+            className="mt-px h-[clamp(15px,1.5vw,20px)] w-auto shrink-0 rounded"
+          />
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[clamp(7px,0.7vw,9px)] leading-tight font-bold text-white">
+              Shopify
+            </p>
+            <p className="mt-px text-[clamp(6px,0.6vw,8px)] leading-snug text-slate-400">
+              Tienes un nuevo pedido de 2 artículos por un total de $ 189.900
+            </p>
+          </div>
+
+          <span className="shrink-0 text-[clamp(5px,0.5vw,7px)] leading-tight text-slate-500">
+            ahora
           </span>
         </div>
       </motion.div>
