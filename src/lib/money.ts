@@ -34,7 +34,11 @@ function scaleCOP(value: number): {
     return { amount: value / 1_000_000, decimals: 0, unit: ' M' }
   }
   if (abs >= 1_000_000) {
-    return { amount: value / 1_000_000, decimals: 1, unit: ' M' }
+    const millions = value / 1_000_000
+    /* Sin decimal muerto: "$ 45 M", no "$ 45,0 M". Solo se muestra el decimal
+       cuando aporta información (45,5 M). */
+    const decimals = Number.isInteger(millions) ? 0 : 1
+    return { amount: millions, decimals, unit: ' M' }
   }
   return { amount: value, decimals: 0, unit: '' }
 }

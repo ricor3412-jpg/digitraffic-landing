@@ -54,15 +54,15 @@ export const NAV_LINKS = [
 
 /* ── 4. HERO ──────────────────────────────────────────────── */
 export const HERO = {
-  /* El titular se parte en 3 para animar la palabra destacada */
-  titleStart: 'Hacemos que tu Shopify',
+  /* El titular se parte para poder insertar el LOGO de Shopify en medio
+     (donde iría la palabra) y animar la parte destacada. */
+  titleStart: 'Hacemos que tu',
+  /* aquí va el logo de Shopify */
   titleHighlight: 'venda más',
   titleEnd: 'con el tráfico que ya tienes.',
   subtitle:
     'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas Shopify para convertirlas en máquinas de vender.',
   cta: 'Quiero una web que venda más',
-  /* Sello de especialización que va bajo el CTA */
-  platformBadge: 'Especialistas en Shopify',
 } as const
 
 /* ── 5. CLIENTES ──────────────────────────────────────────────
@@ -202,15 +202,22 @@ export const CALCULATOR = {
      toda la pieza. */
   upliftPoints: 0.5,
 
-  /* Techo realista del sector: por encima de esto ya estás en la élite y no
-     hay margen que prometer. La mejora alcanzable se estrecha a medida que
-     te acercas a este número, y en el tope es cero. */
-  benchmarkCeiling: 5, // % de conversión
+  /* Techo del sector: por encima de esto ya estás en la élite y no hay margen
+     que prometer. La mejora alcanzable se estrecha conforme te acercas a este
+     número, y en el tope es exactamente cero.
+
+     6 % es el percentil ~90 del e-commerce (la MEDIA real ronda el 2–3 %). Es
+     un techo alto pero defendible: casi nadie lo alcanza, así que la promesa
+     de +0,5 pts sigue viva en casi todo el rango, y a la vez no le dice a
+     quien convierte al 4 % que lo está haciendo mal. Ojo si lo subes más:
+     con el techo en 8, un 3 % (que es normal) puntuaría 37/100 y la pieza
+     pierde credibilidad ante alguien que conoce sus números. */
+  benchmarkCeiling: 6, // % de conversión
 
   /* Umbrales del veredicto */
   thresholds: {
     good: 3, // a partir de aquí, "vas bien"
-    excellent: 4.5, // a partir de aquí, no hay nada que arreglar
+    excellent: 5.5, // a partir de aquí, no hay nada que arreglar
   },
 } as const
 

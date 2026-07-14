@@ -1,8 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { CTAButton } from '@/components/ui/Button'
-import { Counter } from '@/components/ui/Counter'
-import { Float, Pulse } from '@/components/ui/Motion'
-import { GlowOrb, SaleNotification } from '@/components/svg/Visuals'
+import { GlowOrb } from '@/components/svg/Visuals'
+import { TrafficFlow } from '@/components/svg/TrafficFlow'
 import { CALENDLY_DURATION, HERO } from '@/lib/config'
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -48,7 +47,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen items-center overflow-hidden px-5 pt-32 pb-20 sm:px-8"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pt-32 pb-24 sm:px-8"
     >
       {/* Fondo: retícula + orbes de color */}
       <div className="bg-grid absolute inset-0 opacity-40" aria-hidden="true" />
@@ -57,14 +56,25 @@ export function Hero() {
         aria-hidden="true"
       />
       <GlowOrb className="top-[-10%] left-[10%] h-[420px] w-[420px] bg-magenta/25" />
-      <GlowOrb className="right-[5%] bottom-[5%] h-[380px] w-[380px] bg-purple/30" />
+      <GlowOrb className="right-[5%] bottom-[10%] h-[380px] w-[380px] bg-purple/30" />
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-        {/* ── Columna de texto ── */}
-        <div className="flex flex-col items-start gap-8">
+      <div className="relative z-10 mx-auto w-full max-w-4xl">
+        {/* ── Texto, centrado sobre el flujo ──
+            Titular contenido: tiene que convivir con la animación en la misma
+            pantalla, sin empujarla fuera del viewport. */}
+        <div className="flex flex-col items-center gap-5 text-center">
           {/* Titular */}
-          <h1 className="text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl xl:text-7xl">
+          <h1 className="text-[clamp(1.9rem,4.6vw,3.5rem)] leading-[1.08] font-bold">
             <AnimatedWords text={HERO.titleStart} delay={0.2} />{' '}
+            {/* El logo de Shopify ocupa el lugar de la palabra en el titular */}
+            <motion.img
+              src="/logos/shopify-logo.svg"
+              alt="Shopify"
+              initial={{ opacity: 0, y: reduce ? 0 : '0.4em' }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.35, ease: EASE }}
+              className="inline-block h-[0.95em] w-auto translate-y-[0.12em] align-baseline"
+            />{' '}
             {/* Palabra destacada con subrayado que se dibuja solo */}
             <span className="relative inline-block whitespace-nowrap">
               <span className="text-gradient">
@@ -96,7 +106,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1, ease: EASE }}
-            className="max-w-xl text-base leading-relaxed text-muted sm:text-lg"
+            className="max-w-lg text-sm leading-relaxed text-muted sm:text-base"
           >
             {HERO.subtitle}
           </motion.p>
@@ -145,84 +155,21 @@ export function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* Sello de plataforma */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 1.4 }}
-            className="flex items-center gap-2.5"
-          >
-            <img
-              src="/logos/shopify.avif"
-              alt=""
-              aria-hidden="true"
-              className="h-6 w-auto"
-            />
-            <span className="text-xs font-medium text-faint">
-              {HERO.platformBadge}
-            </span>
-          </motion.div>
         </div>
 
-        {/* ── Columna visual ── */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.7, ease: EASE }}
-          className="relative flex justify-center lg:justify-end"
-        >
-          <Float className="relative w-full max-w-md" amplitude={10} duration={6}>
-            {/* Panel principal: métricas en vivo */}
-            <div className="relative rounded-3xl border border-line bg-surface/60 p-6 backdrop-blur-xl">
-              <div className="mb-5 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-xs font-semibold tracking-wide text-faint uppercase">
-                  <Pulse className="bg-gain" size="h-1.5 w-1.5" />
-                  Tu tienda, optimizada
-                </span>
-                <span className="flex gap-1.5" aria-hidden="true">
-                  <span className="h-2 w-2 rounded-full bg-line" />
-                  <span className="h-2 w-2 rounded-full bg-line" />
-                  <span className="h-2 w-2 rounded-full bg-magenta" />
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* ⚠️ TODO: métricas de ejemplo — sustituir por resultados reales */}
-                {[
-                  { label: 'Conversión', v: 68, pre: '+', suf: '%', dec: 0 },
-                  { label: 'Ticket medio', v: 31, pre: '+', suf: '%', dec: 0 },
-                  { label: 'Velocidad', v: 0.9, pre: '', suf: 's', dec: 1 },
-                  { label: 'Recurrencia', v: 44, pre: '+', suf: '%', dec: 0 },
-                ].map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 1.1 + i * 0.1 }}
-                    className="rounded-2xl border border-line/60 bg-void/50 p-4"
-                  >
-                    <p className="text-xs text-faint">{stat.label}</p>
-                    <p className="mt-1 text-2xl font-bold text-bone tabular-nums">
-                      <Counter
-                        value={stat.v}
-                        decimals={stat.dec}
-                        prefix={stat.pre}
-                        suffix={stat.suf}
-                      />
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-
-            </div>
-
-            {/* Notificación flotante superpuesta */}
-            <div className="absolute -bottom-8 -left-4 sm:-left-10">
-              <SaleNotification />
-            </div>
-          </Float>
-        </motion.div>
       </div>
+
+      {/* ── El flujo: tu tráfico entra, tus pedidos salen ──
+          Va DEBAJO del bloque de texto, a todo el ancho del viewport, para que
+          las líneas se pierdan por los bordes de la pantalla. */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.2, delay: 0.5 }}
+        className="pointer-events-none relative z-0 -mt-4 w-full max-w-[1400px]"
+      >
+        <TrafficFlow />
+      </motion.div>
     </section>
   )
 }
