@@ -190,6 +190,9 @@ export function Problems() {
       const overflow = track.scrollWidth - vw
       setDistance(Math.max(0, overflow + 48))
     }
+    /* La VELOCIDAD se controla en la altura del contenedor del pin (abajo):
+       cuanto más alto, más scroll vertical hace falta para el mismo recorrido
+       horizontal, y por tanto más despacio se mueven las tarjetas. */
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
@@ -232,8 +235,13 @@ export function Problems() {
   return (
     <section id="problemas" className="scroll-mt-24">
       {/* El contenedor alto es lo que da "recorrido" al pin: cuanto más alto,
-          más scroll vertical hace falta para recorrer las tarjetas. */}
-      <div ref={pinRef} style={{ height: `calc(100vh + ${distance}px)` }}>
+          más scroll vertical hace falta para recorrer las tarjetas —o sea,
+          más despacio se mueven. El x1,9 es el freno: sin él, las tarjetas
+          se disparaban con un solo giro de rueda. */}
+      <div
+        ref={pinRef}
+        style={{ height: `calc(100vh + ${Math.round(distance * 1.9)}px)` }}
+      >
         {/* Lo que se queda pegado */}
         <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">

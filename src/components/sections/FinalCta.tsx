@@ -21,7 +21,6 @@ export function FinalCta() {
           <CTAButton size="lg">{FINAL_CTA.cta}</CTAButton>
         </div>
 
-        <p className="text-xs text-faint">{COMPANY.scarcity}</p>
       </Reveal>
     </section>
   )

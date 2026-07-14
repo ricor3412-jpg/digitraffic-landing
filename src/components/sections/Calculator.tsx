@@ -7,7 +7,8 @@ import { Counter } from '@/components/ui/Counter'
 import { CALCULATOR } from '@/lib/config'
 import { CURRENCY, formatCOP, splitCOPShort } from '@/lib/money'
 
-const { defaults, ranges, upliftPoints } = CALCULATOR
+const { defaults, ranges, upliftPoints, benchmarkCeiling, thresholds } =
+  CALCULATOR
 
 /* Iconos de cada métrica */
 const ICONS: Record<string, React.ReactNode> = {
@@ -191,18 +192,30 @@ export function Calculator() {
   const m = useMemo(() => {
     const revenue = orders * aov
 
-    const cvrUp = cvr + upliftPoints
-    const ordersUp = (sessions * cvrUp) / 100
+    /* ── El margen de mejora NO es infinito ──────────────────────────
+       Prometer +0,5 puntos a alguien que ya convierte al 10 % es absurdo:
+       le estaríamos diciendo que "pierde 300 millones" cuando en realidad
+       está en la élite. La mejora alcanzable se estrecha conforme te
+       acercas al techo del sector, y en el tope es exactamente cero.  */
+    const headroom = Math.max(0, benchmarkCeiling - cvr) // cuánto te queda
+    const uplift = Math.min(upliftPoints, headroom)
+
+    const cvrUp = cvr + uplift
+    const ordersUp = Math.round((sessions * cvrUp) / 100)
     const revenueUp = ordersUp * aov
 
     const extraOrders = ordersUp - orders
-    const monthlyLoss = revenueUp - revenue
+    const monthlyLoss = Math.max(0, revenueUp - revenue)
 
-    /* Puntuación CRO 0–100. Referencia del sector: ~3 % es bueno en ecommerce. */
-    const score = Math.max(4, Math.min(100, Math.round((cvr / 3) * 100)))
+    /* Puntuación CRO 0–100, tomando el techo del sector como el 100 %. */
+    const score = Math.max(
+      3,
+      Math.min(100, Math.round((cvr / benchmarkCeiling) * 100)),
+    )
 
     return {
       revenue,
+      uplift,
       cvrUp,
       ordersUp,
       revenueUp,
@@ -210,13 +223,18 @@ export function Calculator() {
       monthlyLoss,
       yearlyLoss: monthlyLoss * 12,
       score,
+      /* Si ya está en la élite, la sección cambia de tono: felicita en vez
+         de asustar. Vender miedo a quien no tiene el problema es la forma
+         más rápida de perder credibilidad. */
+      isElite: cvr >= thresholds.excellent,
     }
   }, [sessions, orders, cvr, aov])
 
-  const verdict =
-    m.score >= 75
-      ? { label: 'Vas bien, pero hay margen', tone: 'text-gain' }
-      : m.score >= 40
+  const verdict = m.isElite
+    ? { label: '¡Enhorabuena! Estás en la élite', tone: 'text-gain' }
+    : cvr >= thresholds.good
+      ? { label: 'Vas bien, pero aún hay margen', tone: 'text-gain' }
+      : cvr >= 1.5
         ? { label: 'Estás dejando dinero sobre la mesa', tone: 'text-amber-400' }
         : { label: 'Estás perdiendo dinero', tone: 'text-danger' }
 
@@ -351,38 +369,61 @@ export function Calculator() {
                 </div>
               </div>
 
-              {/* El número que duele */}
-              <motion.div
-                animate={
-                  reduce
-                    ? undefined
-                    : {
-                        borderColor: [
-                          'rgb(255 77 109 / 0.25)',
-                          'rgb(255 77 109 / 0.6)',
-                          'rgb(255 77 109 / 0.25)',
-                        ],
-                      }
-                }
-                transition={{ duration: 2.6, repeat: Infinity }}
-                className="rounded-2xl border border-danger/25 bg-danger/[0.07] p-6"
-              >
-                <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-danger uppercase">
-                  <Pulse className="bg-danger" size="h-1.5 w-1.5" />
-                  Dejas de ganar cada mes
-                </p>
-                <BigMoney
-                  value={m.monthlyLoss}
-                  className="mt-2 block text-4xl font-bold text-danger tabular-nums sm:text-5xl"
-                />
-                <p className="mt-3 text-sm text-muted">
-                  Es decir,{' '}
-                  <span className="font-semibold text-bone">
-                    {formatCOP(m.yearlyLoss)}
-                  </span>{' '}
-                  al año que se te escapan.
-                </p>
-              </motion.div>
+              {/* El número que duele — salvo que no haya nada que doler */}
+              {m.isElite ? (
+                /* Ya convierte por encima del techo del sector: felicitar, no
+                   inventarle un problema que no tiene. */
+                <div className="rounded-2xl border border-gain/30 bg-gain/[0.07] p-6">
+                  <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-gain uppercase">
+                    <Pulse className="bg-gain" size="h-1.5 w-1.5" />
+                    Tu conversión ya es excelente
+                  </p>
+                  <p className="mt-2 text-3xl leading-tight font-bold text-gain sm:text-4xl">
+                    No estás perdiendo dinero
+                  </p>
+                  <p className="mt-3 text-sm text-muted">
+                    Con un {cvr.toFixed(1)} % estás muy por encima de la media
+                    del sector. A este nivel el crecimiento ya no viene de la
+                    conversión, sino del{' '}
+                    <span className="font-semibold text-bone">ticket medio</span>{' '}
+                    y de la{' '}
+                    <span className="font-semibold text-bone">recurrencia</span>.
+                    Hablemos de eso.
+                  </p>
+                </div>
+              ) : (
+                <motion.div
+                  animate={
+                    reduce
+                      ? undefined
+                      : {
+                          borderColor: [
+                            'rgb(255 77 109 / 0.25)',
+                            'rgb(255 77 109 / 0.6)',
+                            'rgb(255 77 109 / 0.25)',
+                          ],
+                        }
+                  }
+                  transition={{ duration: 2.6, repeat: Infinity }}
+                  className="rounded-2xl border border-danger/25 bg-danger/[0.07] p-6"
+                >
+                  <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-danger uppercase">
+                    <Pulse className="bg-danger" size="h-1.5 w-1.5" />
+                    Dejas de ganar cada mes
+                  </p>
+                  <BigMoney
+                    value={m.monthlyLoss}
+                    className="mt-2 block text-4xl font-bold text-danger tabular-nums sm:text-5xl"
+                  />
+                  <p className="mt-3 text-sm text-muted">
+                    Es decir,{' '}
+                    <span className="font-semibold text-bone">
+                      {formatCOP(m.yearlyLoss)}
+                    </span>{' '}
+                    al año que se te escapan.
+                  </p>
+                </motion.div>
+              )}
 
               {/* Comparativa: aquí se ve que TODO sube en cadena */}
               <div className="overflow-hidden rounded-2xl border border-line">
@@ -395,7 +436,7 @@ export function Calculator() {
                   </div>
                   <div className="bg-gain/[0.08] p-3">
                     <p className="text-[10px] font-semibold whitespace-nowrap text-gain">
-                      +{upliftPoints} pts
+                      {m.uplift > 0 ? `+${m.uplift.toFixed(1)} pts` : 'Al tope'}
                     </p>
                   </div>
 
@@ -451,16 +492,27 @@ export function Calculator() {
               </div>
 
               <p className="text-xs leading-relaxed text-faint">
-                Subir la conversión {upliftPoints} puntos son{' '}
-                <span className="font-semibold text-bone">
-                  <Counter value={m.extraOrders} decimals={0} /> pedidos más
-                </span>{' '}
-                cada mes con el mismo tráfico. Sin gastar un peso más en
-                publicidad.
+                {m.isElite ? (
+                  <>
+                    Tu conversión ya roza el techo del sector, así que no te
+                    vamos a prometer subirla más. El margen está en otro sitio.
+                  </>
+                ) : (
+                  <>
+                    Subir la conversión {m.uplift.toFixed(1)} puntos son{' '}
+                    <span className="font-semibold text-bone">
+                      <Counter value={m.extraOrders} decimals={0} /> pedidos más
+                    </span>{' '}
+                    cada mes con el mismo tráfico. Sin gastar un peso más en
+                    publicidad.
+                  </>
+                )}
               </p>
 
               <div className="mt-auto pt-2">
-                <CTAButton className="w-full">{CALCULATOR.cta}</CTAButton>
+                <CTAButton className="w-full">
+                  {m.isElite ? 'Quiero subir mi ticket medio' : CALCULATOR.cta}
+                </CTAButton>
               </div>
             </div>
           </div>

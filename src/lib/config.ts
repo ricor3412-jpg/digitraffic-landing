@@ -28,8 +28,6 @@ export const COMPANY = {
   /* ⚠️ TODO: ajusta estos datos si cambian */
   email: 'figmadigitraffic@gmail.com',
   yearsExperience: 7,
-  /* Gancho de escasez del hero — la referencia usa "5 proyectos/mes" */
-  scarcity: 'Solo trabajamos con 5 proyectos al mes',
 } as const
 
 /* ── 3. NAVEGACIÓN ────────────────────────────────────────── */
@@ -184,8 +182,24 @@ export const CALCULATOR = {
     conversionRate: { min: 0.1, max: 10, step: 0.1 },
     averageOrderValue: { min: 20_000, max: 600_000, step: 10_000 },
   },
-  /* Mejora de conversión que prometemos (en puntos porcentuales) */
+  /* Mejora de conversión que prometemos (en puntos porcentuales).
+     OJO: es el uplift MÁXIMO, no uno garantizado pase lo que pase. Si el
+     visitante ya convierte cerca del techo del sector, el margen de mejora
+     real es menor (ver `benchmarkCeiling`). Decirle a alguien que convierte
+     al 10% que "pierde 300 millones" es absurdo y le quita credibilidad a
+     toda la pieza. */
   upliftPoints: 0.5,
+
+  /* Techo realista del sector: por encima de esto ya estás en la élite y no
+     hay margen que prometer. La mejora alcanzable se estrecha a medida que
+     te acercas a este número, y en el tope es cero. */
+  benchmarkCeiling: 5, // % de conversión
+
+  /* Umbrales del veredicto */
+  thresholds: {
+    good: 3, // a partir de aquí, "vas bien"
+    excellent: 4.5, // a partir de aquí, no hay nada que arreglar
+  },
 } as const
 
 /* ── 9. METODOLOGÍA ──────────────────────────────────────── */

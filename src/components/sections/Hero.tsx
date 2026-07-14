@@ -3,7 +3,7 @@ import { CTAButton } from '@/components/ui/Button'
 import { Counter } from '@/components/ui/Counter'
 import { Float, Pulse } from '@/components/ui/Motion'
 import { GlowOrb, SaleNotification } from '@/components/svg/Visuals'
-import { COMPANY, HERO } from '@/lib/config'
+import { HERO } from '@/lib/config'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -62,19 +62,6 @@ export function Hero() {
       <div className="relative mx-auto grid w-full max-w-6xl gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         {/* ── Columna de texto ── */}
         <div className="flex flex-col items-start gap-8">
-          {/* Badge de escasez */}
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
-            className="inline-flex items-center gap-2.5 rounded-full border border-magenta/30 bg-magenta/10 px-4 py-2 backdrop-blur"
-          >
-            <Pulse />
-            <span className="text-xs font-semibold text-magenta-soft">
-              {COMPANY.scarcity}
-            </span>
-          </motion.div>
-
           {/* Titular */}
           <h1 className="text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl xl:text-7xl">
             <AnimatedWords text={HERO.titleStart} delay={0.2} />{' '}
