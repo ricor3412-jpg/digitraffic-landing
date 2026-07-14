@@ -1,12 +1,20 @@
-import { motion, useInView, useMotionValue, useReducedMotion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Section, SectionHeader } from '@/components/ui/Section'
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { Eyebrow } from '@/components/ui/Section'
 import { Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { PROBLEM_MOCKUPS } from '@/components/svg/Mockups'
 import { PROBLEMS } from '@/lib/config'
 
-/* Icono por problema. Cada uno es un SVG original y simple. */
+const EASE = [0.16, 1, 0.3, 1] as const
+
+/* Icono por problema. */
 const ICONS: Record<string, React.ReactNode> = {
   plantilla: (
     <>
@@ -26,11 +34,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M12 8v4l3 2" />
     </>
   ),
-  cac: (
-    <>
-      <path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-    </>
-  ),
+  cac: <path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />,
   aov: (
     <>
       <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
@@ -53,69 +57,33 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
+type Problem = { id: string; title: string; body: string }
+
 function ProblemCard({
-  id,
-  title,
-  body,
+  problem,
   index,
-  scrollerRef,
+  visible,
 }: {
-  id: string
-  title: string
-  body: string
+  problem: Problem
   index: number
-  scrollerRef: React.RefObject<HTMLUListElement | null>
+  visible: boolean
 }) {
   const reduce = useReducedMotion()
-  const cardRef = useRef<HTMLLIElement>(null)
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  /* La tarjeta sube desde abajo cuando entra en el CARRUSEL (no en el viewport).
-     Por eso el root del observer es el propio scroller horizontal. */
-  const inView = useInView(cardRef, {
-    root: scrollerRef,
-    once: true,
-    margin: '0px -40px 0px -40px',
-  })
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (reduce) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - rect.left)
-    mouseY.set(e.clientY - rect.top)
-  }
+  const { id, title, body } = problem
 
   return (
     <motion.li
-      ref={cardRef}
-      initial={{ opacity: 0, y: reduce ? 0 : 60 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      /* Cada tarjeta sube desde abajo cuando la sección entra en pantalla */
+      initial={{ opacity: 0, y: reduce ? 0 : 70 }}
+      animate={visible ? { opacity: 1, y: 0 } : {}}
       transition={{
         duration: 0.7,
-        delay: Math.min(index, 3) * 0.08,
-        ease: [0.16, 1, 0.3, 1],
+        delay: Math.min(index, 5) * 0.09,
+        ease: EASE,
       }}
-      className="w-[300px] shrink-0 snap-start sm:w-[340px]"
+      className="w-[300px] shrink-0 sm:w-[340px]"
     >
-      <div
-        onMouseMove={handleMouseMove}
-        className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40"
-      >
-        {/* Resplandor que sigue al cursor */}
-        {!reduce && (
-          <motion.div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            style={{
-              background: `radial-gradient(340px circle at var(--x) var(--y), rgb(255 77 109 / 0.10), transparent 70%)`,
-              // @ts-expect-error — variables CSS custom para el gradiente
-              '--x': mouseX,
-              '--y': mouseY,
-            }}
-          />
-        )}
-
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40">
         <div className="relative flex h-full flex-col gap-4">
           {/* Escena: muestra el problema en vez de describirlo */}
           <div className="flex min-h-[132px] items-center rounded-2xl border border-line/60 bg-void/50 p-3">
@@ -140,7 +108,6 @@ function ProblemCard({
 
           <p className="text-sm leading-relaxed text-muted">{body}</p>
 
-          {/* Número de fondo */}
           <span
             className="pointer-events-none absolute -right-1 -bottom-4 font-display text-6xl font-bold text-white/[0.03]"
             aria-hidden="true"
@@ -154,107 +121,139 @@ function ProblemCard({
 }
 
 export function Problems() {
-  const scrollerRef = useRef<HTMLUListElement>(null)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(false)
+  const reduce = useReducedMotion()
+  const pinRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLUListElement>(null)
 
-  /* Sabe si hay más tarjetas a izquierda o derecha, para atenuar las flechas. */
-  const updateEdges = useCallback(() => {
-    const el = scrollerRef.current
-    if (!el) return
-    setAtStart(el.scrollLeft <= 8)
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 8)
+  const [visible, setVisible] = useState(false)
+  const [distance, setDistance] = useState(0)
+
+  /* ── El efecto: mientras la sección está PEGADA a la pantalla, el scroll
+     vertical se traduce en desplazamiento horizontal de las tarjetas.
+     Cuando se acaban, la página sigue bajando con normalidad.
+     ───────────────────────────────────────────────────────────────── */
+  const { scrollYProgress } = useScroll({
+    target: pinRef,
+    offset: ['start start', 'end end'],
+  })
+
+  /* Suavizado, para que no se sienta pegado a la rueda */
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001,
+  })
+
+  const x = useTransform(progress, [0, 1], [0, -distance])
+
+  /* Cuánto hay que desplazar: lo que sobresale de la pista. */
+  useEffect(() => {
+    const measure = () => {
+      const track = trackRef.current
+      if (!track) return
+      const overflow = track.scrollWidth - window.innerWidth
+      setDistance(Math.max(0, overflow + 48)) // +48 de aire al final
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
   }, [])
 
+  /* Dispara la animación de entrada de las tarjetas */
   useEffect(() => {
-    updateEdges()
-    window.addEventListener('resize', updateEdges)
-    return () => window.removeEventListener('resize', updateEdges)
-  }, [updateEdges])
-
-  function scrollBy(dir: 1 | -1) {
-    const el = scrollerRef.current
+    const el = pinRef.current
     if (!el) return
-    /* Avanza de dos en dos tarjetas */
-    const card = el.querySelector('li')?.clientWidth ?? 320
-    el.scrollBy({ left: dir * card * 2, behavior: 'smooth' })
+    const io = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setVisible(true),
+      { threshold: 0.05 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  /* Barra de progreso del recorrido horizontal */
+  const barWidth = useTransform(progress, [0, 1], ['0%', '100%'])
+
+  /* Sin movimiento: rejilla normal, sin pin ni scroll secuestrado. */
+  if (reduce) {
+    return (
+      <section id="problemas" className="scroll-mt-24 px-5 py-24 sm:px-8 md:py-32">
+        <div className="mx-auto w-full max-w-6xl">
+          <Header />
+          <ul className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {PROBLEMS.items.map((p, i) => (
+              <ProblemCard key={p.id} problem={p} index={i} visible />
+            ))}
+          </ul>
+          <div className="mt-12 flex justify-center">
+            <CTAButton>{PROBLEMS.cta}</CTAButton>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
-    <Section id="problemas">
-      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-        <SectionHeader
-          align="left"
-          eyebrow="El diagnóstico"
-          title={
-            <>
-              ¿Por qué tu tienda{' '}
-              <span className="text-danger">no vende lo que debería</span>?
-            </>
-          }
-          subtitle={PROBLEMS.subtitle}
-        />
+    <section id="problemas" className="scroll-mt-24">
+      {/* El contenedor alto es lo que da "recorrido" al pin: cuanto más alto,
+          más scroll vertical hace falta para recorrer las tarjetas. */}
+      <div ref={pinRef} style={{ height: `calc(100vh + ${distance}px)` }}>
+        {/* Lo que se queda pegado */}
+        <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+          <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+            <Header />
+          </div>
 
-        {/* Flechas de navegación */}
-        <Reveal className="flex shrink-0 gap-2">
-          {[
-            { dir: -1 as const, label: 'Anterior', disabled: atStart, d: 'M15 5l-7 7 7 7' },
-            { dir: 1 as const, label: 'Siguiente', disabled: atEnd, d: 'M9 5l7 7-7 7' },
-          ].map((btn) => (
-            <button
-              key={btn.label}
-              type="button"
-              onClick={() => scrollBy(btn.dir)}
-              disabled={btn.disabled}
-              aria-label={btn.label}
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-line bg-surface/60 text-bone transition-all duration-300 hover:border-magenta hover:bg-magenta/10 disabled:cursor-default disabled:opacity-30 disabled:hover:border-line disabled:hover:bg-surface/60"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d={btn.d} />
-              </svg>
-            </button>
-          ))}
-        </Reveal>
-      </div>
+          {/* La pista que se desplaza */}
+          <motion.ul
+            ref={trackRef}
+            style={{ x }}
+            className="mt-10 flex w-max gap-5 px-5 sm:px-8"
+          >
+            {PROBLEMS.items.map((p, i) => (
+              <ProblemCard key={p.id} problem={p} index={i} visible={visible} />
+            ))}
+          </motion.ul>
 
-      {/* Carrusel horizontal: los 7 problemas caben en una sola sección */}
-      <div className="relative mt-12 -mx-5 sm:-mx-8">
-        <ul
-          ref={scrollerRef}
-          onScroll={updateEdges}
-          className="flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {PROBLEMS.items.map((p, i) => (
-            <ProblemCard
-              key={p.id}
-              {...p}
-              index={i}
-              scrollerRef={scrollerRef}
-            />
-          ))}
-        </ul>
+          {/* Progreso del recorrido */}
+          <div className="mx-auto mt-10 w-full max-w-6xl px-5 sm:px-8">
+            <div className="h-[3px] w-full overflow-hidden rounded-full bg-line">
+              <motion.div
+                style={{ width: barWidth }}
+                className="h-full rounded-full bg-gradient-to-r from-magenta to-purple"
+              />
+            </div>
+          </div>
 
-        {/* Difuminado en el borde derecho: insinúa que hay más */}
-        {!atEnd && (
+          {/* Difuminado lateral */}
           <div
             className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-void to-transparent sm:w-24"
             aria-hidden="true"
           />
-        )}
+        </div>
       </div>
 
-      <Reveal className="mt-12 flex justify-center" delay={0.1}>
-        <CTAButton>{PROBLEMS.cta}</CTAButton>
-      </Reveal>
-    </Section>
+      {/* El CTA queda fuera del pin, ya con scroll normal */}
+      <div className="px-5 pt-4 pb-4 sm:px-8">
+        <Reveal className="flex justify-center">
+          <CTAButton>{PROBLEMS.cta}</CTAButton>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+/* Cabecera compartida por las dos variantes (con y sin movimiento) */
+function Header() {
+  return (
+    /* items-start: si no, el eyebrow se estira a todo el ancho de la columna */
+    <div className="flex max-w-3xl flex-col items-start gap-4">
+      <Eyebrow>El diagnóstico</Eyebrow>
+      <h2 className="text-3xl leading-[1.1] font-bold sm:text-4xl md:text-5xl">
+        ¿Por qué tu tienda{' '}
+        <span className="text-danger">no vende lo que debería</span>?
+      </h2>
+      <p className="text-base text-muted">{PROBLEMS.subtitle}</p>
+    </div>
   )
 }

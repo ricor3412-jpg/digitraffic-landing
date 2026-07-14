@@ -128,10 +128,20 @@ function BigMoney({ value, className }: { value: number; className?: string }) {
   )
 }
 
-/* Mantiene los 3 datos ligados coherentes: pedidos = sesiones × conversión.
-   Al mover cualquiera de ellos, se recalcula el que toca. */
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v))
+
+/* El rango de PEDIDOS se deriva de las sesiones: sus extremos son los que
+   producen la conversión mínima y máxima. Así el slider de pedidos nunca
+   puede pedir una conversión imposible (ej. 3.000 pedidos con 50.000
+   sesiones tocaba el techo del 6% y se quedaba clavado). */
+function ordersRange(sessions: number) {
+  const min = Math.max(1, Math.round((sessions * ranges.conversionRate.min) / 100))
+  const max = Math.round((sessions * ranges.conversionRate.max) / 100)
+  /* Paso proporcional, para que el slider se sienta fino en cualquier escala */
+  const step = Math.max(1, Math.round(max / 500))
+  return { min, max, step }
+}
 
 export function Calculator() {
   const reduce = useReducedMotion()
@@ -143,25 +153,23 @@ export function Calculator() {
   const [cvr, setCvr] = useState<number>(defaults.conversionRate)
   const [aov, setAov] = useState<number>(defaults.averageOrderValue)
 
+  /* Los límites de pedidos se recalculan con las sesiones */
+  const oRange = useMemo(() => ordersRange(sessions), [sessions])
+
   /* ── Recálculo cruzado ──────────────────────────────────────────
      Los 4 sliders se mueven, pero pedidos = sesiones × conversión / 100
-     tiene que cumplirse SIEMPRE. Así que al tocar uno, se ajusta otro:
-       · sesiones  → recalcula pedidos (la conversión se mantiene)
-       · pedidos   → recalcula conversión (las sesiones se mantienen)
-       · conversión→ recalcula pedidos (las sesiones se mantienen)
-       · ticket    → independiente, no afecta a la relación
+     se cumple SIEMPRE. Al tocar uno, se ajusta el que corresponde:
+       · sesiones  → mantiene la conversión y recalcula los pedidos
+       · pedidos   → mantiene las sesiones y recalcula la conversión
+       · conversión→ mantiene las sesiones y recalcula los pedidos
+       · ticket    → independiente
      ───────────────────────────────────────────────────────────── */
 
   function changeSessions(next: number) {
     setSessions(next)
-    const nextOrders = clamp(
-      Math.round((next * cvr) / 100),
-      ranges.orders.min,
-      ranges.orders.max,
-    )
-    setOrders(nextOrders)
-    /* Si los pedidos toparon con el límite, la conversión se ajusta para no mentir */
-    setCvr(clamp(+((nextOrders / next) * 100).toFixed(2), ranges.conversionRate.min, ranges.conversionRate.max))
+    /* La conversión se conserva; los pedidos la siguen. Como el rango de
+       pedidos se deriva de las sesiones, el resultado siempre cabe. */
+    setOrders(Math.max(1, Math.round((next * cvr) / 100)))
   }
 
   function changeOrders(next: number) {
@@ -177,13 +185,7 @@ export function Calculator() {
 
   function changeCvr(next: number) {
     setCvr(next)
-    setOrders(
-      clamp(
-        Math.round((sessions * next) / 100),
-        ranges.orders.min,
-        ranges.orders.max,
-      ),
-    )
+    setOrders(Math.max(1, Math.round((sessions * next) / 100)))
   }
 
   const m = useMemo(() => {
@@ -259,9 +261,9 @@ export function Calculator() {
                 icon={ICONS.orders}
                 label="Pedidos / mes"
                 value={orders}
-                min={ranges.orders.min}
-                max={ranges.orders.max}
-                step={ranges.orders.step}
+                min={oRange.min}
+                max={oRange.max}
+                step={oRange.step}
                 onChange={changeOrders}
                 format={(v) => v.toLocaleString('es-CO')}
               />

@@ -76,7 +76,10 @@
     background-color: var(--color-void);
     color: var(--color-bone);
     font-family: var(--font-sans);
-    overflow-x: hidden;
+    /* `clip` y NO `hidden`: overflow-x:hidden convierte al body en contenedor
+       de scroll y eso ROMPE position:sticky (el pin de la sección Problemas
+       dejaba de pegarse). `clip` recorta igual sin crear ese contexto. */
+    overflow-x: clip;
   }
 
   h1,

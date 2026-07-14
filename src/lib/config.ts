@@ -173,11 +173,15 @@ export const CALCULATOR = {
     conversionRate: 1.5, // % — coherente: 50.000 × 1,5% = 750
     averageOrderValue: 180_000, // COP
   },
-  /* Rangos de los sliders */
+  /* Rangos de los sliders.
+     OJO: el de PEDIDOS no está aquí porque no es fijo — se deriva de las
+     sesiones y de los límites de conversión (ver Calculator.tsx). Si fuera
+     fijo, se podrían pedir 20.000 pedidos con 50.000 sesiones = 40% de
+     conversión, que es imposible, y el slider de conversión se quedaba
+     clavado en su tope mintiendo. */
   ranges: {
     sessions: { min: 1_000, max: 500_000, step: 1_000 },
-    orders: { min: 10, max: 20_000, step: 10 },
-    conversionRate: { min: 0.2, max: 6, step: 0.1 },
+    conversionRate: { min: 0.1, max: 12, step: 0.1 },
     averageOrderValue: { min: 20_000, max: 1_000_000, step: 10_000 },
   },
   /* Mejora de conversión que prometemos (en puntos porcentuales) */
