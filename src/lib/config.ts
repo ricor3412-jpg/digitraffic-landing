@@ -180,9 +180,9 @@ export const CALCULATOR = {
      conversión, que es imposible, y el slider de conversión se quedaba
      clavado en su tope mintiendo. */
   ranges: {
-    sessions: { min: 1_000, max: 500_000, step: 1_000 },
-    conversionRate: { min: 0.1, max: 12, step: 0.1 },
-    averageOrderValue: { min: 20_000, max: 1_000_000, step: 10_000 },
+    sessions: { min: 1_000, max: 100_000, step: 1_000 },
+    conversionRate: { min: 0.1, max: 10, step: 0.1 },
+    averageOrderValue: { min: 20_000, max: 600_000, step: 10_000 },
   },
   /* Mejora de conversión que prometemos (en puntos porcentuales) */
   upliftPoints: 0.5,

@@ -69,18 +69,40 @@ function ProblemCard({
   visible: boolean
 }) {
   const reduce = useReducedMotion()
+  const cardRef = useRef<HTMLLIElement>(null)
+  const [entered, setEntered] = useState(false)
   const { id, title, body } = problem
+
+  /* Cada tarjeta sube desde abajo CUANDO ENTRA EN PANTALLA por la derecha,
+     no todas a la vez. El observer mira el viewport: como la pista se
+     desplaza en horizontal, cada tarjeta va cruzando el borde derecho y
+     dispara su animación justo en ese momento. */
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el || reduce) return
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setEntered(true)
+          io.disconnect()
+        }
+      },
+      /* Un pelín de margen negativo: dispara cuando ya asoma de verdad */
+      { threshold: 0.35, rootMargin: '0px -40px 0px -40px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [reduce])
+
+  const show = reduce ? visible : entered
 
   return (
     <motion.li
-      /* Cada tarjeta sube desde abajo cuando la sección entra en pantalla */
-      initial={{ opacity: 0, y: reduce ? 0 : 70 }}
-      animate={visible ? { opacity: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.7,
-        delay: Math.min(index, 5) * 0.09,
-        ease: EASE,
-      }}
+      ref={cardRef}
+      initial={{ opacity: 0, y: reduce ? 0 : 90 }}
+      animate={show ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.75, ease: EASE }}
       className="w-[300px] shrink-0 sm:w-[340px]"
     >
       <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface/50 p-6 transition-colors duration-300 hover:border-danger/40">
@@ -127,6 +149,9 @@ export function Problems() {
 
   const [visible, setVisible] = useState(false)
   const [distance, setDistance] = useState(0)
+  /* La pista arranca corrida a la derecha: solo se ve la primera tarjeta
+     asomando y el resto queda fuera, esperando a que scrollees. */
+  const [startX, setStartX] = useState(0)
 
   /* ── El efecto: mientras la sección está PEGADA a la pantalla, el scroll
      vertical se traduce en desplazamiento horizontal de las tarjetas.
@@ -144,15 +169,26 @@ export function Problems() {
     restDelta: 0.001,
   })
 
-  const x = useTransform(progress, [0, 1], [0, -distance])
+  /* Va del offset inicial (todo a la derecha) hasta el final de la pista */
+  const x = useTransform(progress, [0, 1], [startX, -distance])
 
-  /* Cuánto hay que desplazar: lo que sobresale de la pista. */
+  /* Mide el recorrido: desde dónde arranca y cuánto hay que desplazar. */
   useEffect(() => {
     const measure = () => {
       const track = trackRef.current
       if (!track) return
-      const overflow = track.scrollWidth - window.innerWidth
-      setDistance(Math.max(0, overflow + 48)) // +48 de aire al final
+      const vw = window.innerWidth
+
+      /* Arranque: deja la primera tarjeta asomando ~60% por la derecha.
+         En pantallas grandes empujamos más, para que se vea claramente que
+         hay contenido esperando fuera. */
+      const card = (track.querySelector('li')?.clientWidth ?? 320) + 20
+      const offset = Math.max(0, vw - card * 1.55)
+      setStartX(offset)
+
+      /* Distancia total: lo que sobresale, más lo que empujamos al inicio */
+      const overflow = track.scrollWidth - vw
+      setDistance(Math.max(0, overflow + 48))
     }
     measure()
     window.addEventListener('resize', measure)
