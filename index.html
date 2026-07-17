@@ -12,32 +12,185 @@
     </title>
     <meta
       name="description"
-      content="Optimizamos tu tienda Shopify para que venda más sin aumentar tu inversión en publicidad. Auditoría CRO, diseño y desarrollo con garantía de resultados."
+      content="Optimizamos tu tienda Shopify para que venda más sin aumentar tu inversión en publicidad. Auditoría CRO, diseño y desarrollo a medida."
     />
+    <link rel="canonical" href="https://digitraffic.co/" />
 
-    <!-- Open Graph / redes sociales -->
+    <!-- Open Graph / redes sociales.
+         OJO: los bots de Meta, LinkedIn y X NO ejecutan JavaScript, así que
+         SOLO leen estos tags del HTML. Todo lo que deba salir en un preview
+         tiene que estar aquí, no en React. -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://digitraffic.co/" />
+    <meta property="og:site_name" content="Digitraffic" />
     <meta
       property="og:title"
       content="Digitraffic — Hacemos que tu Shopify venda más con el tráfico que ya tienes"
     />
     <meta
       property="og:description"
-      content="Agencia especializada en CRO y ecommerce Shopify. Más conversión, más ticket medio, más recurrencia. Con garantía contractual de resultados."
+      content="Agencia especializada en CRO y ecommerce Shopify. Más conversión, más ticket medio, más recurrencia."
     />
     <meta property="og:locale" content="es_ES" />
-    <!-- ⚠️ TODO: crea una imagen 1200x630 y déjala en /public/og-image.jpg -->
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image" content="https://digitraffic.co/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Digitraffic — agencia CRO para tiendas Shopify"
+    />
 
     <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Digitraffic — Hacemos que tu Shopify venda más con el tráfico que ya tienes"
+    />
+    <meta
+      name="twitter:description"
+      content="Agencia especializada en CRO y ecommerce Shopify. Más conversión, más ticket medio, más recurrencia."
+    />
+    <meta name="twitter:image" content="https://digitraffic.co/og-image.jpg" />
 
     <!-- Precarga de fuentes (Google Fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <meta name="theme-color" content="#0b0f15" />
+
+    <!-- ────────────────────────────────────────────────────────────
+         DATOS ESTRUCTURADOS (JSON-LD)
+         Van en el HTML, no en React: Google los lee sin renderizar JS.
+         · Organization → identidad de la agencia (Knowledge Panel)
+         · WebSite      → nombre del sitio en resultados
+         · FAQPage      → habilita el rich snippet desplegable en Google.
+                          Las preguntas DEBEN coincidir con las visibles
+                          en la página (FAQ en src/lib/config.ts) o Google
+                          lo considera spam y lo penaliza.
+         ──────────────────────────────────────────────────────────── -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://digitraffic.co/#organization",
+            "name": "Digitraffic",
+            "url": "https://digitraffic.co/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://digitraffic.co/brand/logo-horizontal.svg"
+            },
+            "description": "Agencia de CRO especializada en tiendas Shopify. Optimizamos la conversión, el ticket medio y la recurrencia con el tráfico que ya tienes.",
+            "email": "figmadigitraffic@gmail.com",
+            "knowsAbout": [
+              "Conversion Rate Optimization",
+              "Shopify",
+              "Ecommerce",
+              "Auditoría CRO",
+              "Diseño web de conversión"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://digitraffic.co/#website",
+            "url": "https://digitraffic.co/",
+            "name": "Digitraffic",
+            "inLanguage": "es",
+            "publisher": { "@id": "https://digitraffic.co/#organization" }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://digitraffic.co/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Solo hacen tiendas online?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Nos especializamos en ecommerce sobre Shopify, porque es donde generamos más impacto. También trabajamos landing pages de alta conversión y optimización CRO sobre tiendas ya existentes."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Qué es la auditoría CRO?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Es un análisis con datos de tu tienda: dónde abandonan los usuarios, qué fricciones hay en el checkout, qué puntos de decisión están mal resueltos. De ahí sale un plan priorizado por impacto sobre tu facturación."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cuánto tardan en diseñar y desarrollar la tienda?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "El proceso completo lleva entre 5 y 8 semanas, dividido en cuatro fases: onboarding, auditoría CRO, diseño y desarrollo."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cómo funciona la comunicación?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Tienes un canal directo con el equipo y reuniones de seguimiento periódicas. Nada de esperar días por una respuesta."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Recibo asesoramiento para mejorar mi estrategia?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí. No solo entregamos una web: te acompañamos con recomendaciones de estrategia de conversión, retención y ticket medio."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cuándo se efectúa el pago?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "El pago se fracciona por fases del proyecto. Lo concretamos en la llamada de diagnóstico, sin sorpresas ni letra pequeña."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <!-- ────────────────────────────────────────────────────────────
+         GOOGLE TAG MANAGER
+         Un solo contenedor para GA4, Meta Pixel y Google Ads: se añaden
+         desde la interfaz de GTM, sin volver a tocar este archivo.
+
+         ⚠️ TODO: sustituye GTM-XXXXXXX por tu ID real
+         (tagmanager.google.com → Admin → ID del contenedor).
+         Mientras el ID sea el placeholder, el script no carga nada.
+         ──────────────────────────────────────────────────────────── -->
+    <script>
+      ;(function (w, d, s, l, i) {
+        // Sin ID real no se carga nada: evita peticiones muertas en dev.
+        if (!i || i === 'GTM-XXXXXXX') return
+        w[l] = w[l] || []
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' })
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : ''
+        j.async = true
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl
+        f.parentNode.insertBefore(j, f)
+      })(window, document, 'script', 'dataLayer', 'GTM-XXXXXXX')
+    </script>
   </head>
   <body>
+    <!-- GTM (noscript). ⚠️ TODO: mismo ID que arriba. -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

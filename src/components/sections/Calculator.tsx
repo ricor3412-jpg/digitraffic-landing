@@ -217,11 +217,12 @@ export function Calculator() {
   return (
     <Section id="calculadora">
       <SectionHeader
-        eyebrow="La calculadora"
         title={
           <>
             ¿Cuánto vale{' '}
-            <span className="text-gradient">un punto de conversión</span> en tu
+            {/* En rojo, no en magenta: el magenta se reserva al hero y a los
+                CTA. Alternar evita que toda la página tire a rosa. */}
+            <span className="text-danger">un punto de conversión</span> en tu
             tienda?
           </>
         }
@@ -287,6 +288,14 @@ export function Calculator() {
               />
             </div>
 
+            {/* Facturación actual: es SU dato, calculado de sus números, así que
+                vive con las mediciones (columna izquierda). */}
+            <div className="mt-7 flex items-center justify-between gap-3 border-t border-line pt-5">
+              <span className="text-sm text-muted">Facturas hoy al mes</span>
+              <span className="font-mono text-lg font-bold text-bone tabular-nums">
+                {formatCOP(m.revenue)}
+              </span>
+            </div>
           </div>
 
           {/* ── Resultado ──
@@ -344,31 +353,31 @@ export function Calculator() {
                 </div>
               </div>
 
-              {/* La cifra */}
+              {/* La cifra clave, explicada claro: cuánto MÁS facturarías si tu
+                  conversión subiera 1 punto, con el mismo tráfico. */}
               <div className="rounded-2xl border border-magenta/25 bg-magenta/[0.07] p-6">
-                <p className="text-xs font-semibold tracking-wide text-magenta-soft uppercase">
-                  Cada punto de conversión te vale
+                <p className="text-sm font-medium text-muted">
+                  Si subes{' '}
+                  <span className="font-semibold text-bone">1 punto</span> tu
+                  conversión, facturarías
                 </p>
-                <Money
-                  value={m.perPoint}
-                  className="mt-2 block text-4xl font-bold text-magenta-soft tabular-nums sm:text-5xl"
-                />
-                <p className="mt-2 text-sm text-muted">
-                  al mes ·{' '}
+                <div className="mt-3 flex items-baseline gap-2">
+                  <Money
+                    value={m.perPoint}
+                    className="text-4xl font-bold text-magenta-soft tabular-nums sm:text-5xl"
+                  />
+                  <span className="text-lg font-semibold text-magenta-soft">
+                    más / mes
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-muted">
+                  Son{' '}
                   <span className="font-semibold text-bone">
                     {formatCOP(m.perPointYearly)}
                   </span>{' '}
-                  al año
+                  más al año, con el tráfico que ya tienes.
                 </p>
               </div>
-
-              <p className="text-xs text-faint">
-                Hoy facturas{' '}
-                <span className="font-semibold text-muted">
-                  {formatCOP(m.revenue)}
-                </span>{' '}
-                al mes con el tráfico que ya tienes.
-              </p>
 
               <div className="mt-auto pt-1">
                 <CTAButton className="w-full">{CALCULATOR.cta}</CTAButton>

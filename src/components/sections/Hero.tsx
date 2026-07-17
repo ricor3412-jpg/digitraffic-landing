@@ -57,8 +57,8 @@ export function Hero() {
         className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-void"
         aria-hidden="true"
       />
-      <GlowOrb className="top-[-10%] left-[10%] h-[420px] w-[420px] bg-magenta/25" />
-      <GlowOrb className="right-[5%] bottom-[10%] h-[380px] w-[380px] bg-purple/30" />
+      <GlowOrb className="top-[-10%] left-[10%] h-[420px] w-[420px] bg-magenta/15" />
+      <GlowOrb className="right-[5%] bottom-[10%] h-[380px] w-[380px] bg-purple/25" />
 
       {/* Barra del hero: se queda aquí, NO sigue al scroll */}
       <div className="absolute inset-x-0 top-0 z-30 px-5 pt-5 sm:px-8">

@@ -39,7 +39,7 @@ export const COMPANY = {
   name: 'Digitraffic',
   /* ⚠️ TODO: ajusta estos datos si cambian */
   email: 'figmadigitraffic@gmail.com',
-  yearsExperience: 7,
+  yearsExperience: 10,
 } as const
 
 /* ── 3. NAVEGACIÓN ────────────────────────────────────────── */
@@ -61,36 +61,93 @@ export const HERO = {
   titleHighlight: 'venda más',
   titleEnd: 'con el tráfico que ya tienes.',
   subtitle:
-    'Somos un equipo obsesionado con la conversión. Llevamos más de 7 años creando y optimizando tiendas Shopify para convertirlas en máquinas de vender.',
+    'Somos un equipo obsesionado con la conversión. Llevamos más de 10 años creando y optimizando tiendas Shopify para que vendan más.',
   cta: 'Quiero una web que venda más',
 } as const
 
 /* ── 5. CLIENTES ──────────────────────────────────────────────
-   Tarjetas rectangulares: una foto de fondo con el logo encima.
+   Tarjetas rectangulares: la foto YA trae el logo incrustado (vienen así
+   exportadas de Figma), por eso `logo` es null en todas — pintar otro encima
+   sería duplicarlo. El campo se conserva por si algún cliente futuro aporta
+   solo foto y hay que superponerle su logo.
 
-   ⚠️ TODO: reemplaza con tus clientes reales.
-   · image → foto en /public/clients/ (vertical, ~3:4). Si es null se pinta
-     un degradado de marca como placeholder.
-   · logo  → SVG/PNG blanco en /public/clients/. Si es null se escribe el
-     nombre en texto.
+   · image → foto en /public/clients/ (vertical 3:4, WebP ~720px).
+             Si es null se pinta un degradado de marca como placeholder.
+   · logo  → SVG/PNG blanco. Si es null, no se superpone nada.
+   · url   → web del cliente. Si es null la tarjeta NO es clicable, así que
+             una URL que falte nunca produce un enlace roto.
    ─────────────────────────────────────────────────────────── */
 export const CLIENTS_HEADLINE =
-  'Algunas de las marcas con las que hemos trabajado estos últimos 7 años'
+  'Algunas de las marcas con las que hemos trabajado estos últimos 10 años'
 
 export type Client = {
   name: string
   image: string | null
   logo: string | null
+  url: string | null
 }
 
 export const CLIENTS: Client[] = [
-  { name: 'Cliente Uno', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Dos', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Tres', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Cuatro', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Cinco', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Seis', image: null, logo: null }, // ⚠️ TODO
-  { name: 'Cliente Siete', image: null, logo: null }, // ⚠️ TODO
+  {
+    name: 'Evobike',
+    image: '/clients/evobike.webp',
+    logo: null,
+    url: 'https://evobike.com.co/',
+  },
+  {
+    name: 'Lami',
+    image: '/clients/lami.webp',
+    logo: null,
+    url: 'https://lami.com.co/',
+  },
+  {
+    name: 'Casa Marqueza',
+    image: '/clients/casa-marqueza.webp',
+    logo: null,
+    url: 'https://casamarqueza.com/',
+  },
+  {
+    name: 'Pultime',
+    image: '/clients/pultime.webp',
+    logo: null,
+    url: 'https://pultime.com/',
+  },
+  {
+    name: 'La Squadra',
+    image: '/clients/la-squadra.webp',
+    logo: null,
+    url: 'https://www.lasquadra.com.co/',
+  },
+  {
+    name: 'Petit Bowtique',
+    image: '/clients/petit-bowtique.webp',
+    logo: null,
+    url: 'https://petitbowtique.com/',
+  },
+  {
+    name: 'Elite.Living',
+    image: '/clients/elite-living.webp',
+    logo: null,
+    url: 'https://eliteliving.com.co/',
+  },
+  {
+    name: 'The MindPixels',
+    image: '/clients/the-mindpixels.webp',
+    logo: null,
+    url: 'https://themindpixels.com/',
+  },
+  {
+    name: 'Okey Sportwear',
+    image: '/clients/okey-sportwear.webp',
+    logo: null,
+    url: 'https://okeysport.com/',
+  },
+  {
+    name: 'Audiocolor',
+    image: '/clients/audiocolor.webp',
+    logo: null,
+    url: 'https://audiocolor.co/',
+  },
 ]
 
 /* ── 6. PROBLEMAS (agitación del dolor) ───────────────────── */
@@ -141,7 +198,7 @@ export const PROBLEMS = {
 /* ── 7. SOLUCIONES ────────────────────────────────────────── */
 export const SOLUTIONS = {
   title: 'Sabemos cómo hacer que tu web venda más sin que gastes más',
-  subtitle: 'Llevamos 7 años arreglando exactamente estos problemas.',
+  subtitle: 'Llevamos 10 años arreglando exactamente estos problemas.',
   cta: 'Quiero obtener estos resultados',
   items: [
     {
@@ -223,7 +280,7 @@ export const METHODOLOGY = {
   title: 'Nuestra metodología',
   subtitle:
     'Así trabajamos para darte el mejor servicio con los mejores resultados.',
-  cta: 'Quiero trabajar juntos',
+  cta: 'Quiero empezar',
   steps: [
     {
       id: 'onboarding',
@@ -286,6 +343,5 @@ export const FAQ = {
 /* ── 12. CTA FINAL ────────────────────────────────────────── */
 export const FINAL_CTA = {
   title: 'Hagamos que tu Shopify facture el doble.',
-  subtitle: 'Sin doblar el presupuesto en ads.',
-  cta: 'Agenda tu diagnóstico gratuito',
+  cta: 'Agenda tu diagnóstico',
 } as const

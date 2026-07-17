@@ -6,9 +6,6 @@ import {
   useTransform,
 } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { Eyebrow } from '@/components/ui/Section'
-import { Reveal } from '@/components/ui/Motion'
-import { CTAButton } from '@/components/ui/Button'
 import { PROBLEM_MOCKUPS } from '@/components/svg/Mockups'
 import { PROBLEMS } from '@/lib/config'
 
@@ -224,9 +221,6 @@ export function Problems() {
               <ProblemCard key={p.id} problem={p} index={i} visible />
             ))}
           </ul>
-          <div className="mt-12 flex justify-center">
-            <CTAButton>{PROBLEMS.cta}</CTAButton>
-          </div>
         </div>
       </section>
     )
@@ -277,12 +271,6 @@ export function Problems() {
         </div>
       </div>
 
-      {/* El CTA queda fuera del pin, ya con scroll normal */}
-      <div className="px-5 pt-4 pb-4 sm:px-8">
-        <Reveal className="flex justify-center">
-          <CTAButton>{PROBLEMS.cta}</CTAButton>
-        </Reveal>
-      </div>
     </section>
   )
 }
@@ -292,7 +280,6 @@ function Header() {
   return (
     /* items-start: si no, el eyebrow se estira a todo el ancho de la columna */
     <div className="flex max-w-3xl flex-col items-start gap-4">
-      <Eyebrow>El diagnóstico</Eyebrow>
       <h2 className="text-3xl leading-[1.1] font-bold sm:text-4xl md:text-5xl">
         ¿Por qué tu tienda{' '}
         <span className="text-danger">no vende lo que debería</span>?

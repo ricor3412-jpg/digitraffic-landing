@@ -58,8 +58,10 @@ El orden de las secciones **es** el argumento de venta:
   gratis hasta que suba" es un compromiso que la agencia no quiere adquirir.
 
 **Los CTA escalan con el estado mental del visitante:**
-"Quiero solucionar estos problemas" → "Quiero obtener estos resultados"
-→ "Quiero mejorar mi tasa de conversión" → "Agenda tu diagnóstico".
+"Quiero obtener estos resultados" (soluciones) → "Quiero hablar de mis números"
+(calculadora) → "Quiero empezar" (metodología) → "Agenda tu diagnóstico" (cierre).
+La sección de Problemas **ya no lleva CTA**: solo agita el dolor, el primer botón
+llega con la solución.
 
 ---
 
@@ -94,11 +96,67 @@ El orden de las secciones **es** el argumento de venta:
       isotipo (que sí lleva el degradado) + nombre en texto blanco.
 - [x] Encuadre del hero verificado a 1440×900, 1920×1080 y 390×844: el navbar nunca
       tapa el titular, el CTA se ve sin scroll y no hay scroll horizontal.
+- [x] **Ronda de correcciones de copy (revisión cliente):**
+      · Experiencia unificada a **10 años** (`yearsExperience`, hero, clientes, soluciones).
+      · Hero: frase suavizada a "para que vendan más" (antes "máquinas de vender").
+      · Problemas: **CTA eliminado** (imports muertos limpiados).
+      · Soluciones y Calculadora: **eyebrows quitados** ("La solución", "La calculadora").
+      · Metodología: CTA "Quiero trabajar juntos" → **"Quiero empezar"**.
+      · CTA final: quitado el subtítulo "Sin doblar el presupuesto en ads." y la palabra
+        "gratuito" del botón → **"Agenda tu diagnóstico"**.
+- [x] **Rediseño de 3 visuales animados (según página de referencia):**
+      · **Onboarding** — nuevo `OnboardingIntegrations`: "buscador" con typewriter en
+        loop (escribe y borra frases) + abanico de cartas compactas agrupadas en su
+        propio panel con Shopify al centro, y logos del stack flotando a los lados
+        (GA4, Search Console, Meta). Reemplaza las barras de "análisis competitivo".
+      · **Diseño** — nuevo `CroBeforeAfter`: mockup de tienda cuyo degradado transiciona
+        de rojo (no convierte) a verde (optimizada), con cursor recorriendo y badge
+        "Especialista en CRO". Reemplaza a `DesignVisual`.
+      · **Soluciones/tráfico** — nuevo `TrafficToSales` (réplica de iurop): los
+        visitantes (caras del hero) caen por un embudo de dos paredes hasta el icono
+        de Shopify en la boca; cada llegada dispara una notificación de compra. En loop.
+        Reemplaza el gráfico ascendente + notificación anteriores.
+      · **Soluciones/retención** — nuevo `ShopifyOrdersPhone`: réplica de la app de
+        Shopify (en inglés) en un teléfono cortado por abajo, con la lista de pedidos
+        en scroll infinito.
+      · Nuevos componentes: `src/components/svg/MethodologyVisuals.tsx` y
+        `ShopifyOrdersPhone` en `Visuals.tsx`. Logos oficiales en `public/brand/logos/`
+        (simple-icons, a color).
+      · **Metodología** — las 4 fases ahora viven dentro de UN SOLO panel de fondo
+        común (contenedor con borde/fondo que las envuelve, como iurop), y se quitaron
+        los dobles marcos de los visuales internos para que se integren en el panel.
+      · **Intercambio de visuales**: Auditoría CRO recibe el mockup "antes→después"
+        (rojo→verde, es un hallazgo de auditoría) y Proceso de diseño recibe la nueva
+        `DesigningSection`: el cursor maqueta la ficha —arrastra la imagen con handles,
+        teclea el título, suelta el botón—. El antiguo embudo de barras se eliminó.
+      · **Embudo tráfico→ventas** rehecho: ya no es un triángulo sino un embudo real
+        (tolva + cuello vertical). Los visitantes siguen curvas `offsetPath` que rozan
+        las paredes hasta el cuello. Ocupa toda la card y la notificación salta al
+        llegar al Shopify.
+      · Todo respeta `prefers-reduced-motion`. Verificado con Playwright + build limpio.
+- [x] **SEO técnico base** (para indexar y pautar):
+      · `public/robots.txt` (permite todo + bots de IA) y `public/sitemap.xml`.
+      · **Schema JSON-LD** en `index.html`: Organization + WebSite + FAQPage. Las 6
+        preguntas del FAQPage DEBEN coincidir con las de `config.ts` (verificado) o
+        Google lo penaliza — si se edita una FAQ, actualizar también el JSON-LD.
+      · `canonical`, `og:url`, `og:site_name`, `og:image:width/height`, twitter tags.
+      · Corregido: el `og:description` prometía "garantía contractual", sección ya
+        retirada. Eliminado.
+      · **Google Tag Manager** instalado con guard: si el ID sigue siendo el
+        placeholder `GTM-XXXXXXX`, no carga nada (evita peticiones muertas en dev).
+        Desde GTM se gestionan GA4, Meta Pixel y Google Ads sin tocar código.
+      · Dominio usado en todo: `https://digitraffic.co/`.
 
 ### Pendiente ⏳
 
 - [ ] Conectar a GitHub (`git remote add origin …` + `git push -u origin main`)
 - [ ] Importar el repo en Vercel y desplegar
+- [ ] **Rellenar el ID de GTM** (`GTM-XXXXXXX` en `index.html`, 2 sitios) y desde GTM
+      añadir GA4 (`G-…`), Meta Pixel y Google Ads (`AW-…`).
+- [ ] **Prerenderizado / SSR**: es una SPA de Vite, el HTML llega vacío. Google renderiza
+      JS pero tarda; y Meta/LinkedIn/X NO ejecutan JS (solo ven los meta del index, que
+      ya están bien). Para SEO robusto, evaluar `vite-plugin-ssr`/prerender o migrar a
+      un framework con SSR. No bloquea el lanzamiento pero conviene.
 
 ---
 
@@ -111,7 +169,7 @@ Todo marcado con `⚠️ TODO` en `src/lib/config.ts`:
 | 1 | **URL real de Calendly** | `CALENDLY_URL` en `src/lib/config.ts`    | 🔴 Sí — sin esto no se agenda nada |
 | 2 | Logos de clientes        | `CLIENTS` + archivos en `public/clients/` | 🟠 Alta — la prueba social es texto |
 | 3 | Métricas reales del hero | `src/components/sections/Hero.tsx`       | 🟠 Alta — las cifras son inventadas |
-| 4 | Imagen Open Graph        | `public/og-image.jpg` (1200×630)         | 🟡 Media |
+| 4 | ~~Imagen Open Graph~~    | ✅ Hecha: `public/og-image.jpg` (1200×630), con la marca real | — |
 | 5 | Tipografía Oceanwide     | `public/fonts/oceanwide-semibold.woff2`  | 🟢 Baja — cae a Albert Sans |
 | 6 | Casos de estudio         | Sección nueva, aún no existe             | 🟡 Media — mejoraría mucho la conversión |
 

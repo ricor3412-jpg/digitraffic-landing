@@ -1,0 +1,19 @@
+# robots.txt — Digitraffic
+# Landing de captación: queremos que se indexe entera.
+
+User-agent: *
+Allow: /
+
+# Bots de IA: permitidos (aparecer en respuestas de ChatGPT/Perplexity
+# es tráfico cualificado para una agencia). Si algún día no interesa,
+# se bloquean aquí.
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://digitraffic.co/sitemap.xml

@@ -7,15 +7,13 @@ export function FinalCta() {
   return (
     <section className="relative overflow-hidden px-5 py-28 sm:px-8 md:py-36">
       <div className="bg-grid absolute inset-0 opacity-30" aria-hidden="true" />
-      <GlowOrb className="bottom-[-30%] left-1/2 h-[560px] w-[560px] -translate-x-1/2 bg-magenta/25" />
+      <GlowOrb className="bottom-[-30%] left-1/2 h-[560px] w-[560px] -translate-x-1/2 bg-magenta/15" />
 
       <Reveal className="relative mx-auto flex max-w-3xl flex-col items-center gap-7 text-center">
         <h2 className="text-3xl leading-[1.1] font-bold sm:text-5xl md:text-6xl">
           Hagamos que tu tienda{' '}
-          <span className="text-gradient">facture el doble</span>.
+          <span className="text-gradient">facture el doble</span>
         </h2>
-
-        <p className="text-lg text-muted sm:text-xl">{FINAL_CTA.subtitle}</p>
 
         <div className="mt-2">
           <CTAButton size="lg">{FINAL_CTA.cta}</CTAButton>

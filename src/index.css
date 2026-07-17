@@ -137,6 +137,10 @@
   max-width: none !important;
   border-radius: 24px;
   overflow: hidden;
+  /* El wrapper de Calendly viene con fondo blanco; el iframe oscuro no lo
+     cubre por completo y ese blanco asomaba como un marco grueso alrededor.
+     Lo teñimos del fondo de marca para que el modal se vea de una sola pieza. */
+  background-color: #0b0f15 !important;
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.08),
     0 40px 100px -20px rgb(0 0 0 / 0.85),
@@ -147,6 +151,8 @@
 .calendly-overlay .calendly-popup-content iframe {
   width: 100% !important;
   height: 100% !important;
+  /* Mismo motivo: sin esto, el contenedor del iframe deja ver su blanco. */
+  background-color: #0b0f15 !important;
 }
 
 /* El botón de cerrar cae sobre el velo oscuro, así que lo queremos blanco */

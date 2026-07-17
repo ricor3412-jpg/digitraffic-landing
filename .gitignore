@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Material de referencia y fuentes de trabajo (no forman parte de la web).
+# Los assets USABLES ya viven en public/; esto son los originales sueltos.
+*.mp4
+*.pdf
+*.zip
+Brand/branding-zip/
+/shopifylogo.svg
+/ic_analytics.svg
+/google_search_console_icon-vector_brandlogos.net_hxtfr-512x512-1.png

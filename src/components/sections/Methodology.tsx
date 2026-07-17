@@ -1,10 +1,14 @@
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Section } from '@/components/ui/Section'
-import { Eyebrow } from '@/components/ui/Section'
 import { Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import { LiquidCodePanel } from '@/components/svg/CodePanel'
+import {
+  OnboardingIntegrations,
+  CroBeforeAfter,
+  DesigningSection,
+} from '@/components/svg/MethodologyVisuals'
 import { METHODOLOGY } from '@/lib/config'
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -37,126 +41,13 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
-/* ── Visual de la fase 1: análisis competitivo ── */
-function OnboardingVisual() {
-  const rows = [
-    { name: 'Tu tienda', v: 38, self: true },
-    { name: 'Competidor A', v: 72, self: false },
-    { name: 'Competidor B', v: 64, self: false },
-  ]
-
-  return (
-    <div className="rounded-2xl border border-line bg-surface/40 p-5">
-      <p className="mb-4 font-mono text-[10px] tracking-wide text-faint uppercase">
-        Análisis competitivo
-      </p>
-      <div className="flex flex-col gap-3">
-        {rows.map((r, i) => (
-          <div key={r.name} className="flex items-center gap-2.5">
-            <span
-              className={`w-24 shrink-0 text-[11px] ${r.self ? 'font-semibold text-danger' : 'text-muted'}`}
-            >
-              {r.name}
-            </span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-void">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${r.v}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, delay: i * 0.12, ease: EASE }}
-                className={`h-full rounded-full ${r.self ? 'bg-danger' : 'bg-line'}`}
-              />
-            </div>
-            <span className="w-8 shrink-0 text-right font-mono text-[11px] text-muted">
-              {r.v}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ── Visual de la fase 2: embudo con fugas ── */
-function AuditVisual() {
-  const steps = [
-    { label: 'Visitas', w: 100 },
-    { label: 'Ficha de producto', w: 62 },
-    { label: 'Carrito', w: 24 },
-    { label: 'Compra', w: 9 },
-  ]
-
-  return (
-    <div className="rounded-2xl border border-line bg-surface/40 p-5">
-      <p className="mb-4 font-mono text-[10px] tracking-wide text-faint uppercase">
-        Dónde se cae el embudo
-      </p>
-      <div className="flex flex-col gap-2">
-        {steps.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, scaleX: 0.6 }}
-            whileInView={{ opacity: 1, scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            style={{ width: `${s.w}%` }}
-            className="origin-left rounded-lg bg-gradient-to-r from-magenta/70 to-purple/50 px-3 py-1.5"
-          >
-            <span className="text-[10px] font-semibold whitespace-nowrap text-white">
-              {s.label} · {s.w}%
-            </span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ── Visual de la fase 3: diseño con intención ── */
-function DesignVisual() {
-  return (
-    <div className="rounded-2xl border border-line bg-surface/40 p-5">
-      <p className="mb-4 font-mono text-[10px] tracking-wide text-faint uppercase">
-        Cada bloque, un propósito
-      </p>
-      <div className="flex gap-4">
-        <div className="h-28 w-24 shrink-0 rounded-xl bg-line/30" />
-        <div className="flex flex-1 flex-col justify-center gap-3">
-          {[
-            { label: 'Título de producto', h: 'h-2.5' },
-            { label: 'Descripción', h: 'h-2' },
-          ].map((p, i) => (
-            <motion.div
-              key={p.label}
-              initial={{ opacity: 0, x: 8 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 + i * 0.12 }}
-              className={`${p.h} rounded bg-line/50`}
-              style={{ width: i === 0 ? '80%' : '100%' }}
-            />
-          ))}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-1 flex h-9 items-center justify-center rounded-full bg-magenta"
-          >
-            <span className="text-[10px] font-bold text-white">
-              AÑADIR AL CARRITO
-            </span>
-          </motion.div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const STEP_VISUALS: Record<string, React.ReactNode> = {
-  onboarding: <OnboardingVisual />,
-  auditoria: <AuditVisual />,
-  diseno: <DesignVisual />,
+  onboarding: <OnboardingIntegrations />,
+  /* El mockup "antes→después" es un hallazgo de auditoría, no de diseño:
+     enseña dónde está el problema. Por eso vive en Auditoría CRO. */
+  auditoria: <CroBeforeAfter />,
+  /* Y Diseño muestra cómo se monta la ficha, pieza a pieza. */
+  diseno: <DesigningSection />,
   desarrollo: <LiquidCodePanel />,
 }
 
@@ -191,9 +82,8 @@ export function Methodology() {
         {/* ── Columna izquierda: pestañas pegadas ── */}
         <div className="md:sticky md:top-28 md:self-start">
           <Reveal className="flex flex-col gap-5">
-            <Eyebrow>Cómo trabajamos</Eyebrow>
             <h2 className="text-3xl leading-[1.1] font-bold sm:text-4xl">
-              Nuestra <span className="text-gradient">metodología</span>
+              Nuestra metodología
             </h2>
             <p className="text-sm leading-relaxed text-muted">
               {METHODOLOGY.subtitle}
@@ -267,17 +157,21 @@ export function Methodology() {
           </Reveal>
         </div>
 
-        {/* ── Columna derecha: el contenido que rueda ── */}
-        <div ref={trackRef} className="flex flex-col gap-16 md:gap-28">
+        {/* ── Columna derecha: las 4 fases dentro de UN SOLO panel de fondo
+            (como iurop) — un contenedor común envuelve todas las fases. ── */}
+        <div
+          ref={trackRef}
+          className="flex flex-col gap-16 rounded-3xl border border-line bg-surface/30 p-6 sm:p-8 md:gap-24 md:p-10"
+        >
           {STEPS.map((step) => (
             <div
               key={step.id}
               id={`fase-${step.id}`}
-              className="scroll-mt-32 md:min-h-[60vh] md:justify-center md:flex md:flex-col"
+              className="scroll-mt-32 md:min-h-[50vh] md:justify-center md:flex md:flex-col"
             >
               <Reveal>
                 <div className="flex flex-col gap-5">
-                  <span className="inline-flex w-fit rounded-full border border-line bg-surface px-3 py-1 font-mono text-[11px] font-semibold text-magenta-soft">
+                  <span className="inline-flex w-fit rounded-full border border-line bg-surface px-3 py-1 font-mono text-[11px] font-semibold text-muted">
                     {step.tag}
                   </span>
                   <h3 className="text-xl font-bold text-bone sm:text-2xl">

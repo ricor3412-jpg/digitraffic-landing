@@ -2,8 +2,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { CLIENTS, CLIENTS_HEADLINE, type Client } from '@/lib/config'
 import { Reveal } from '@/components/ui/Motion'
 
-/* Marquesina de tarjetas rectangulares: foto de fondo con el logo encima.
-   ⚠️ TODO: imágenes y logos son placeholders. Ver CLIENTS en src/lib/config.ts */
+/* Marquesina de tarjetas rectangulares: cada foto ya trae el logo del cliente
+   incrustado. La tarjeta enlaza a la web real cuando CLIENTS[i].url existe. */
 
 /* Degradados de marca, para que un placeholder no se vea igual que el siguiente. */
 const GRADIENTS = [
@@ -17,45 +17,54 @@ const GRADIENTS = [
 ]
 
 function ClientCard({ client, index }: { client: Client; index: number }) {
-  const { name, image, logo } = client
+  const { name, image, url } = client
+
+  /* La foto ya trae el logo del cliente incrustado, así que no se superpone
+     ni texto ni logo: solo un velo sutil para dar profundidad y unificar
+     las tarjetas. Si hay url, toda la tarjeta es un enlace a la web real. */
+  const card = (
+    <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-line/60">
+      {image ? (
+        <img
+          src={image}
+          alt={name}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        /* Placeholder: degradado de marca + retícula + nombre */
+        <>
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]}`}
+          />
+          <div className="bg-grid absolute inset-0 opacity-30" />
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <span className="text-center text-lg font-bold tracking-tight text-white/85">
+              {name}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* Velo sutil en reposo; al pasar el mouse se desvanece y la foto se ilumina */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent transition-opacity duration-500 group-hover:opacity-0" />
+    </div>
+  )
 
   return (
     <li className="w-[240px] shrink-0 px-3 sm:w-[280px]">
-      <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-line/60">
-        {image ? (
-          <img
-            src={image}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          /* Placeholder: degradado de marca + retícula */
-          <>
-            <div
-              className={`absolute inset-0 bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]}`}
-            />
-            <div className="bg-grid absolute inset-0 opacity-30" />
-          </>
-        )}
-
-        {/* Velo, para que el logo siempre se lea sobre cualquier foto */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
-
-        {/* Logo (o el nombre, si aún no hay logo) */}
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          {logo ? (
-            <img
-              src={logo}
-              alt={name}
-              className="max-h-10 w-auto max-w-[70%] object-contain opacity-90 transition-opacity duration-300 group-hover:opacity-100"
-            />
-          ) : (
-            <span className="text-center text-lg font-bold tracking-tight text-white/85 transition-colors duration-300 group-hover:text-white">
-              {name}
-            </span>
-          )}
-        </div>
-      </div>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Ver el sitio de ${name}`}
+          className="block outline-none focus-visible:ring-2 focus-visible:ring-magenta/70 rounded-2xl"
+        >
+          {card}
+        </a>
+      ) : (
+        card
+      )}
     </li>
   )
 }

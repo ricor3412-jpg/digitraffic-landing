@@ -3,33 +3,28 @@ import { Reveal } from '@/components/ui/Motion'
 import { CTAButton } from '@/components/ui/Button'
 import {
   AOVBars,
-  OrdersList,
-  RisingChart,
-  SaleNotification,
+  ShopifyOrdersPhone,
+  TrafficToSales,
 } from '@/components/svg/Visuals'
 import { SOLUTIONS } from '@/lib/config'
 
 /* Cada solución trae su propio visual animado. */
 const VISUALS = {
-  notification: (
-    <div className="flex flex-col items-center gap-6">
-      <RisingChart />
-      <SaleNotification />
-    </div>
-  ),
+  notification: <TrafficToSales />,
   aov: <AOVBars />,
-  orders: <OrdersList />,
+  orders: <ShopifyOrdersPhone />,
 } as const
 
 export function Solutions() {
   return (
     <Section id="soluciones" className="overflow-hidden">
       <SectionHeader
-        eyebrow="La solución"
         title={
           <>
             Sabemos cómo hacer que tu web{' '}
-            <span className="text-gradient">venda más</span> sin que gastes más
+            {/* Verde: aquí "vender más" es la ganancia, y de paso descarga de
+                rosa la página (el magenta se reserva al hero y los CTA). */}
+            <span className="text-gain">venda más</span> sin que gastes más
           </>
         }
         subtitle={SOLUTIONS.subtitle}
@@ -47,7 +42,7 @@ export function Solutions() {
               {/* Texto */}
               <Reveal className={flipped ? 'md:order-2' : ''}>
                 <div className="flex flex-col items-start gap-5">
-                  <span className="font-mono text-xs font-semibold text-magenta">
+                  <span className="font-mono text-xs font-semibold text-faint">
                     0{i + 1}
                   </span>
                   <h3 className="text-2xl leading-tight font-bold sm:text-3xl">

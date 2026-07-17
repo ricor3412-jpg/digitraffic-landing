@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap — Digitraffic
+  Es una landing de una sola página: las secciones son anclas (#problemas,
+  #calculadora…) y NO se listan como URLs propias, porque no lo son. Añadir
+  anclas aquí no ayuda a indexar y ensucia el sitemap.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://digitraffic.co/</loc>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
