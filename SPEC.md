@@ -149,7 +149,9 @@ llega con la solución.
 
 ### Pendiente ⏳
 
-- [ ] Conectar a GitHub (`git remote add origin …` + `git push -u origin main`)
+- [x] **Repo en GitHub**: `ricor3412-jpg/digitraffic-landing` (privado). Rama `main`
+      con tracking a `origin/main`. Material de referencia (mp4/pdf/zip/logos sueltos)
+      excluido vía `.gitignore`.
 - [ ] Importar el repo en Vercel y desplegar
 - [ ] **Rellenar el ID de GTM** (`GTM-XXXXXXX` en `index.html`, 2 sitios) y desde GTM
       añadir GA4 (`G-…`), Meta Pixel y Google Ads (`AW-…`).
